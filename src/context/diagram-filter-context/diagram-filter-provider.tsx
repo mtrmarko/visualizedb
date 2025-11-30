@@ -52,6 +52,10 @@ export const DiagramFilterProvider: React.FC<React.PropsWithChildren> = ({
 
     useEffect(() => {
         if (diagramId && diagramId === diagramIdOfLoadedFilter.current) {
+            console.log(
+                'diagram-filter-provider: saving filter to backend:',
+                JSON.stringify(filter)
+            );
             updateDiagramFilter(diagramId, filter);
         }
     }, [diagramId, filter, updateDiagramFilter]);
@@ -68,6 +72,10 @@ export const DiagramFilterProvider: React.FC<React.PropsWithChildren> = ({
         const loadFilterFromStorage = async (diagramId: string) => {
             if (diagramId) {
                 const storedFilter = await getDiagramFilter(diagramId);
+                console.log(
+                    'diagram-filter-provider: loaded filter from backend:',
+                    JSON.stringify(storedFilter)
+                );
 
                 let filterToSet = storedFilter;
 
@@ -77,14 +85,27 @@ export const DiagramFilterProvider: React.FC<React.PropsWithChildren> = ({
                         schemas.length > 1
                             ? { schemaIds: [schemas[0].id] }
                             : {};
+                    console.log(
+                        'diagram-filter-provider: no filter stored, using default:',
+                        JSON.stringify(filterToSet),
+                        'schemas.length:',
+                        schemas.length
+                    );
                 }
 
+                console.log(
+                    'diagram-filter-provider: setting filter state to:',
+                    JSON.stringify(filterToSet)
+                );
                 setFilter(filterToSet);
             }
 
             setLoading(false);
         };
 
+        console.log(
+            'diagram-filter-provider: resetting filter on diagram change'
+        );
         setFilter({});
 
         if (diagramId) {

@@ -202,6 +202,14 @@ export const updateDiagram = (
     diagramId: string,
     updates: Partial<Diagram>
 ): void => {
+    console.log(
+        'updateDiagram service - diagramId:',
+        diagramId,
+        'userId:',
+        userId
+    );
+    console.log('updateDiagram service - update keys:', Object.keys(updates));
+
     const setClauses: string[] = [];
     const values: any[] = [];
 
@@ -220,6 +228,10 @@ export const updateDiagram = (
     if (updates.tables !== undefined) {
         setClauses.push('tables_json = ?');
         values.push(JSON.stringify(updates.tables));
+        console.log(
+            'updateDiagram service - updating tables, count:',
+            updates.tables.length
+        );
     }
     if (updates.relationships !== undefined) {
         setClauses.push('relationships_json = ?');
@@ -243,6 +255,7 @@ export const updateDiagram = (
     }
 
     if (setClauses.length === 0) {
+        console.log('updateDiagram service - no changes to apply');
         return;
     }
 
@@ -250,6 +263,11 @@ export const updateDiagram = (
     values.push(Date.now());
 
     values.push(diagramId, userId);
+
+    console.log(
+        'updateDiagram service - SQL:',
+        `UPDATE diagrams SET ${setClauses.join(', ')} WHERE id = ? AND user_id = ?`
+    );
 
     const result = db
         .prepare(
@@ -260,6 +278,8 @@ export const updateDiagram = (
     `
         )
         .run(...values);
+
+    console.log('updateDiagram service - result.changes:', result.changes);
 
     if (result.changes === 0) {
         throw new AppError(404, 'Diagram not found');
@@ -324,9 +344,15 @@ export const getDiagramFilter = (userId: string, diagramId: string): any => {
         return null;
     }
 
+    // Return undefined for null columns instead of empty arrays
+    // undefined = no restriction, [] = restrict to nothing (hide all)
     return {
-        tableIds: row.table_ids_json ? JSON.parse(row.table_ids_json) : [],
-        schemaIds: row.schema_ids_json ? JSON.parse(row.schema_ids_json) : [],
+        tableIds: row.table_ids_json
+            ? JSON.parse(row.table_ids_json)
+            : undefined,
+        schemaIds: row.schema_ids_json
+            ? JSON.parse(row.schema_ids_json)
+            : undefined,
     };
 };
 
@@ -346,7 +372,9 @@ export const updateDiagramFilter = (
     ).run(
         diagramId,
         userId,
-        JSON.stringify(filter.tableIds || []),
-        JSON.stringify(filter.schemaIds || [])
+        // Store null for undefined, not empty array
+        // undefined/null = no restriction, [] = restrict to nothing
+        filter.tableIds !== undefined ? JSON.stringify(filter.tableIds) : null,
+        filter.schemaIds !== undefined ? JSON.stringify(filter.schemaIds) : null
     );
 };
