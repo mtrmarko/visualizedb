@@ -13,30 +13,38 @@ if (!fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, { recursive: true });
 }
 
-let db: Database;
+let sqlDb: Database | undefined;
 let SQL: any;
 
 // Initialize SQL.js
 export const initializeSqlJs = async () => {
-    SQL = await initSqlJs({
-        locateFile: (file: string) => `https://sql.js.org/dist/${file}`,
-    });
+    // Prefer loading the wasm binary from the local sql.js package in Node.js
+    try {
+        const wasmPath = require.resolve('sql.js/dist/sql-wasm.wasm');
+        const wasmBinary = new Uint8Array(fs.readFileSync(wasmPath));
+        SQL = await initSqlJs({ wasmBinary: wasmBinary.buffer });
+    } catch {
+        // Fallback to default behavior if local wasm cannot be resolved
+        SQL = await initSqlJs({
+            locateFile: (file: string) => `https://sql.js.org/dist/${file}`,
+        });
+    }
 
     // Load existing database or create new one
     if (fs.existsSync(dbPath)) {
         const buffer = fs.readFileSync(dbPath);
-        db = new SQL.Database(buffer);
+        sqlDb = new SQL.Database(buffer);
     } else {
-        db = new SQL.Database();
+        sqlDb = new SQL.Database();
     }
 
-    return db;
+    return sqlDb;
 };
 
 // Save database to file
 export const saveDatabase = () => {
-    if (db) {
-        const data = db.export();
+    if (sqlDb) {
+        const data = sqlDb.export();
         const buffer = Buffer.from(data);
         fs.writeFileSync(dbPath, buffer);
     }
@@ -44,12 +52,12 @@ export const saveDatabase = () => {
 
 // Get database instance
 export const getDb = (): Database => {
-    if (!db) {
+    if (!sqlDb) {
         throw new Error(
             'Database not initialized. Call initializeSqlJs() first.'
         );
     }
-    return db;
+    return sqlDb!;
 };
 
 // Wrapper class to make sql.js feel more like better-sqlite3
@@ -112,8 +120,8 @@ export class DbWrapper {
     }
 
     close() {
-        if (db) {
-            db.close();
+        if (sqlDb) {
+            sqlDb.close();
         }
     }
 }

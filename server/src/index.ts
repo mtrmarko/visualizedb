@@ -1,24 +1,23 @@
 import app from './app';
 import { config } from './config/env';
 import { initializeDatabase } from './config/database';
+import type { Server } from 'http';
 
-// Initialize database and start server
+let server: Server | null = null;
+
 initializeDatabase()
     .then(() => {
-        // Start server
-        const server = app.listen(config.port, () => {
+        server = app.listen(config.port, () => {
             console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║                    ChartDB Server                          ║
 ╠════════════════════════════════════════════════════════════╣
-║  Environment: ${config.nodeEnv.padEnd(42)} ║
-║  Port:        ${config.port.toString().padEnd(42)} ║
+║  Environment: ${String(config.nodeEnv).padEnd(42)} ║
+║  Port:        ${String(config.port).padEnd(42)} ║
 ║  API URL:     http://localhost:${config.port}/api${' '.repeat(20)} ║
 ╚════════════════════════════════════════════════════════════╝
         `);
         });
-
-        return server;
     })
     .catch((error) => {
         console.error('Failed to initialize database:', error);
@@ -26,12 +25,16 @@ initializeDatabase()
     });
 
 // Graceful shutdown
-const shutdown = () => {
+const shutdown = (): void => {
     console.log('\nShutting down gracefully...');
-    server.close(() => {
-        console.log('Server closed');
+    if (server) {
+        server.close(() => {
+            console.log('Server closed');
+            process.exit(0);
+        });
+    } else {
         process.exit(0);
-    });
+    }
 
     // Force shutdown after 10 seconds
     setTimeout(() => {
