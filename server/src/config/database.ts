@@ -66,9 +66,13 @@ export class DbWrapper {
         return {
             run: (...params: any[]) => {
                 const db = getDb();
-                db.run(sql, params);
+                const stmt = db.prepare(sql);
+                stmt.bind(params);
+                stmt.step();
+                const changes = db.getRowsModified();
+                stmt.free();
                 saveDatabase();
-                return { changes: db.getRowsModified() };
+                return { changes };
             },
             get: (...params: any[]) => {
                 const db = getDb();

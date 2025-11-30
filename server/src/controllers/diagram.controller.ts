@@ -79,6 +79,12 @@ export const update = (req: Request, res: Response, next: NextFunction) => {
         const { id } = req.params;
         const { diagram } = req.body;
 
+        console.log('update controller - diagramId:', id, 'userId:', userId);
+        console.log(
+            'update controller - diagram keys:',
+            Object.keys(diagram || {})
+        );
+
         updateDiagram(userId, id, diagram);
 
         // Fetch updated diagram
@@ -92,8 +98,14 @@ export const update = (req: Request, res: Response, next: NextFunction) => {
         };
         const updatedDiagram = getDiagram(userId, id, fullOptions);
 
+        console.log(
+            'update controller - updated diagram found:',
+            !!updatedDiagram
+        );
+
         res.json({ diagram: updatedDiagram });
     } catch (error) {
+        console.error('update controller - error:', error);
         next(error);
     }
 };
@@ -142,7 +154,8 @@ export const getFilter = (req: Request, res: Response, next: NextFunction) => {
 
         const filter = getDiagramFilter(userId, id);
 
-        res.json({ filter: filter || { tableIds: [], schemaIds: [] } });
+        // Return null if no filter exists, so frontend can apply default logic
+        res.json({ filter: filter || null });
     } catch (error) {
         next(error);
     }

@@ -16,6 +16,9 @@ export interface ApiStorageProviderProps {
     children: ReactNode;
 }
 
+// Queue to serialize addTable operations and prevent race conditions
+let addTableQueue: Promise<void> = Promise.resolve();
+
 export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
     children,
 }) => {
@@ -77,6 +80,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string,
         filter: DiagramFilter
     ): Promise<void> => {
+        console.log('updateDiagramFilter called with:', filter);
         await apiClient.put(`/diagrams/${diagramId}/filter`, { filter });
     };
 
@@ -120,7 +124,11 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         try {
             const params = buildIncludeParams(options);
             const response = await apiClient.get(`/diagrams/${id}${params}`);
-            return response.data.diagram;
+            const diagram = response.data.diagram;
+            console.log('API getDiagram response:', diagram);
+            console.log('Tables count:', diagram?.tables?.length);
+            console.log('First table:', diagram?.tables?.[0]);
+            return diagram;
         } catch (error) {
             console.error('Failed to get diagram:', error);
             return undefined;
@@ -134,6 +142,14 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         id: string;
         attributes: Partial<Diagram>;
     }): Promise<void> => {
+        if (attributes.tables) {
+            console.log(
+                'updateDiagram - updating tables, first 3 tables x,y:',
+                attributes.tables
+                    .slice(0, 3)
+                    .map((t) => ({ name: t.name, x: t.x, y: t.y }))
+            );
+        }
         await apiClient.put(`/diagrams/${id}`, { diagram: attributes });
     };
 
@@ -149,11 +165,39 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         table: DBTable;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, { includeTables: true });
-        if (!diagram) throw new Error('Diagram not found');
+        // Queue this operation to prevent race conditions when adding multiple tables
+        const operation = async () => {
+            const diagram = await getDiagram(diagramId, {
+                includeTables: true,
+            });
+            if (!diagram) throw new Error('Diagram not found');
 
-        const tables = [...(diagram.tables || []), table];
-        await updateDiagram({ id: diagramId, attributes: { tables } });
+            console.log(
+                'addTable - fetched diagram with',
+                diagram.tables?.length || 0,
+                'tables, adding',
+                table.name,
+                'at position x:',
+                table.x,
+                'y:',
+                table.y
+            );
+            const tables = [...(diagram.tables || []), table];
+            console.log(
+                'addTable - saving with',
+                tables.length,
+                'tables, last table:',
+                tables[tables.length - 1]?.name,
+                'x:',
+                tables[tables.length - 1]?.x,
+                'y:',
+                tables[tables.length - 1]?.y
+            );
+            await updateDiagram({ id: diagramId, attributes: { tables } });
+        };
+
+        addTableQueue = addTableQueue.then(operation, operation);
+        await addTableQueue;
     };
 
     const getTable = async ({

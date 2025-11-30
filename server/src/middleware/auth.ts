@@ -38,6 +38,15 @@ export const verifyDiagramOwnership = (
         const diagramId = req.params.id || req.params.diagramId;
         const userId = req.user?.userId;
 
+        console.log(
+            'verifyDiagramOwnership - diagramId:',
+            diagramId,
+            'userId:',
+            userId,
+            'method:',
+            req.method
+        );
+
         if (!userId) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
@@ -45,6 +54,8 @@ export const verifyDiagramOwnership = (
         const diagram = db
             .prepare('SELECT user_id FROM diagrams WHERE id = ?')
             .get(diagramId) as { user_id: string } | undefined;
+
+        console.log('verifyDiagramOwnership - diagram found:', !!diagram);
 
         if (!diagram) {
             return res.status(404).json({ error: 'Diagram not found' });
@@ -55,7 +66,8 @@ export const verifyDiagramOwnership = (
         }
 
         next();
-    } catch {
+    } catch (error) {
+        console.error('verifyDiagramOwnership - error:', error);
         return res.status(500).json({ error: 'Server error' });
     }
 };
