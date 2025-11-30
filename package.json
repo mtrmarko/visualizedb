@@ -5,7 +5,12 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
+        "dev:server": "cd server && npm run dev",
+        "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
         "build": "npm run lint && tsc -b && vite build",
+        "build:server": "cd server && npm run build",
+        "build:all": "npm run build && npm run build:server",
+        "start": "cd server && npm start",
         "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
         "lint:fix": "npm run lint -- --fix",
         "preview": "vite preview",
