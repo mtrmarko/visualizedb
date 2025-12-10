@@ -60,8 +60,10 @@ export const OpenDiagramDialog: React.FC<OpenDiagramDialogProps> = ({
         if (!dialog.open) {
             return;
         }
-        setSelectedDiagramId(undefined);
-        fetchDiagrams();
+        requestAnimationFrame(() => {
+            setSelectedDiagramId(undefined);
+            fetchDiagrams();
+        });
     }, [dialog.open, fetchDiagrams]);
 
     const openDiagram = useCallback(

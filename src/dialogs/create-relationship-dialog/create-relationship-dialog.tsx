@@ -40,11 +40,10 @@ export const CreateRelationshipDialog: React.FC<
     const [referencedFieldId, setReferencedFieldId] = useState<
         string | undefined
     >();
-    const [errorMessage, setErrorMessage] = useState('');
+    const [apiError, setApiError] = useState('');
     const { t } = useTranslation();
     const { tables, getTable, createRelationship, getField } = useVisualizeDB();
     const { openRelationshipFromSidebar } = useLayout();
-    const [canCreateRelationship, setCanCreateRelationship] = useState(false);
     const { fitView, setEdges } = useReactFlow();
     const { databaseType } = useVisualizeDB();
     const [primaryFieldSelectOpen, setPrimaryFieldSelectOpen] = useState(false);
@@ -91,20 +90,24 @@ export const CreateRelationshipDialog: React.FC<
 
     useEffect(() => {
         if (!dialog.open) return;
-        setPrimaryTableId(undefined);
-        setPrimaryFieldId(undefined);
-        setReferencedTableId(undefined);
-        setReferencedFieldId(undefined);
-        setErrorMessage('');
-        setPrimaryFieldSelectOpen(false);
-        setReferencedTableSelectOpen(false);
+        requestAnimationFrame(() => {
+            setPrimaryTableId(undefined);
+            setPrimaryFieldId(undefined);
+            setReferencedTableId(undefined);
+            setReferencedFieldId(undefined);
+            setApiError('');
+            setPrimaryFieldSelectOpen(false);
+            setReferencedTableSelectOpen(false);
+        });
     }, [dialog.open]);
 
     useEffect(() => {
         if (preSelectedSourceTableId) {
             const table = getTable(preSelectedSourceTableId);
             if (table) {
-                setPrimaryTableId(preSelectedSourceTableId);
+                requestAnimationFrame(() => {
+                    setPrimaryTableId(preSelectedSourceTableId);
+                });
             }
 
             setTimeout(() => {
@@ -113,23 +116,21 @@ export const CreateRelationshipDialog: React.FC<
         }
     }, [preSelectedSourceTableId, getTable]);
 
-    useEffect(() => {
-        setCanCreateRelationship(false);
-        setErrorMessage('');
+    const validationError = useMemo(() => {
         if (
             !primaryTableId ||
             !primaryFieldId ||
             !referencedTableId ||
             !referencedFieldId
         ) {
-            return;
+            return ''; // No error if fields are empty, just disabled
         }
 
         const primaryField = getField(primaryTableId, primaryFieldId);
         const referencedField = getField(referencedTableId, referencedFieldId);
 
         if (!primaryField || !referencedField) {
-            return;
+            return '';
         }
 
         if (
@@ -139,20 +140,34 @@ export const CreateRelationshipDialog: React.FC<
                 databaseType
             )
         ) {
-            setErrorMessage(ErrorMessageRelationshipFieldsNotSameType);
-            return;
+            return ErrorMessageRelationshipFieldsNotSameType;
         }
 
-        setCanCreateRelationship(true);
+        return '';
     }, [
         primaryTableId,
         primaryFieldId,
         referencedTableId,
         referencedFieldId,
-        setErrorMessage,
         getField,
         databaseType,
     ]);
+
+    const canCreateRelationship = useMemo(
+        () =>
+            !validationError &&
+            primaryTableId &&
+            primaryFieldId &&
+            referencedTableId &&
+            referencedFieldId,
+        [
+            validationError,
+            primaryTableId,
+            primaryFieldId,
+            referencedTableId,
+            referencedFieldId,
+        ]
+    );
 
     const handleCreateRelationship = useCallback(async () => {
         if (
@@ -164,41 +179,46 @@ export const CreateRelationshipDialog: React.FC<
             return;
         }
 
-        const relationship = await createRelationship({
-            sourceFieldId: primaryFieldId,
-            sourceTableId: primaryTableId,
-            targetFieldId: referencedFieldId,
-            targetTableId: referencedTableId,
-        });
+        try {
+            const relationship = await createRelationship({
+                sourceFieldId: primaryFieldId,
+                sourceTableId: primaryTableId,
+                targetFieldId: referencedFieldId,
+                targetTableId: referencedTableId,
+            });
 
-        setEdges((edges) =>
-            edges.map((edge) =>
-                edge.id == relationship.id
-                    ? {
-                          ...edge,
-                          selected: true,
-                      }
-                    : {
-                          ...edge,
-                          selected: false,
-                      }
-            )
-        );
-        fitView({
-            duration: 500,
-            maxZoom: 1,
-            minZoom: 1,
-            nodes: [
-                {
-                    id: relationship.sourceTableId,
-                },
-                {
-                    id: relationship.targetTableId,
-                },
-            ],
-        });
+            setEdges((edges) =>
+                edges.map((edge) =>
+                    edge.id == relationship.id
+                        ? {
+                              ...edge,
+                              selected: true,
+                          }
+                        : {
+                              ...edge,
+                              selected: false,
+                          }
+                )
+            );
+            fitView({
+                duration: 500,
+                maxZoom: 1,
+                minZoom: 1,
+                nodes: [
+                    {
+                        id: relationship.sourceTableId,
+                    },
+                    {
+                        id: relationship.targetTableId,
+                    },
+                ],
+            });
 
-        openRelationshipFromSidebar(relationship.id);
+            openRelationshipFromSidebar(relationship.id);
+        } catch (error) {
+            console.error(error);
+            setApiError('Failed to create relationship');
+        }
     }, [
         primaryTableId,
         primaryFieldId,
@@ -253,6 +273,7 @@ export const CreateRelationshipDialog: React.FC<
                                     onChange={(value) => {
                                         const newTableId = value as string;
                                         setPrimaryTableId(newTableId);
+                                        setApiError('');
                                         if (
                                             newTableId !==
                                             preSelectedSourceTableId
@@ -289,9 +310,10 @@ export const CreateRelationshipDialog: React.FC<
                                         value={primaryFieldId}
                                         open={primaryFieldSelectOpen}
                                         onOpenChange={setPrimaryFieldSelectOpen}
-                                        onChange={(value) =>
-                                            setPrimaryFieldId(value as string)
-                                        }
+                                        onChange={(value) => {
+                                            setPrimaryFieldId(value as string);
+                                            setApiError('');
+                                        }}
                                         emptyPlaceholder={t(
                                             'create_relationship_dialog.no_fields_found'
                                         )}
@@ -324,6 +346,7 @@ export const CreateRelationshipDialog: React.FC<
                                     onChange={(value) => {
                                         setReferencedTableId(value as string);
                                         setReferencedFieldId(undefined);
+                                        setApiError('');
                                     }}
                                     emptyPlaceholder={t(
                                         'create_relationship_dialog.no_tables_found'
@@ -352,11 +375,12 @@ export const CreateRelationshipDialog: React.FC<
                                             'create_relationship_dialog.referenced_field_placeholder'
                                         )}
                                         value={referencedFieldId}
-                                        onChange={(value) =>
+                                        onChange={(value) => {
                                             setReferencedFieldId(
                                                 value as string
-                                            )
-                                        }
+                                            );
+                                            setApiError('');
+                                        }}
                                         emptyPlaceholder={t(
                                             'create_relationship_dialog.no_fields_found'
                                         )}
@@ -365,7 +389,9 @@ export const CreateRelationshipDialog: React.FC<
                             </div>
                         </div>
                     </div>
-                    <p className="mt-2 text-sm text-red-700">{errorMessage}</p>
+                    <p className="mt-2 text-sm text-red-700">
+                        {validationError || apiError}
+                    </p>
                 </div>
                 <DialogFooter className="flex !justify-between gap-2">
                     <DialogClose asChild>

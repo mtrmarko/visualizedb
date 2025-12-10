@@ -1407,7 +1407,7 @@ export const Canvas: React.FC<CanvasProps> = ({ initialTables }) => {
 
     // Handle mouse move to update cursor position for floating edge
     const { screenToFlowPosition } = useReactFlow();
-    const rafIdRef = useRef<number>();
+    const rafIdRef = useRef<number | undefined>(undefined);
     const handleMouseMove = useCallback(
         (event: React.MouseEvent) => {
             if (tempFloatingEdge) {

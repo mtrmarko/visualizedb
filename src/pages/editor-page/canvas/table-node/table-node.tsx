@@ -137,10 +137,12 @@ export const TableNode: React.FC<NodeProps<TableNodeType>> = React.memo(
         useEffect(() => {
             if (editTableMode && editModeInitialFieldCount === null) {
                 // Entering edit mode - capture current field count
-                setEditModeInitialFieldCount(fields.length);
+                requestAnimationFrame(() =>
+                    setEditModeInitialFieldCount(fields.length)
+                );
             } else if (!editTableMode && editModeInitialFieldCount !== null) {
                 // Exiting edit mode - reset
-                setEditModeInitialFieldCount(null);
+                requestAnimationFrame(() => setEditModeInitialFieldCount(null));
             }
         }, [editTableMode, fields.length, editModeInitialFieldCount]);
 

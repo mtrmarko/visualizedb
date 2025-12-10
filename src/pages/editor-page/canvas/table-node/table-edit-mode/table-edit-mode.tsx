@@ -58,11 +58,13 @@ export const TableEditMode: React.FC<TableEditModeProps> = React.memo(
         );
 
         // Sync selectedSchemaId when table.schema changes
-        useEffect(() => {
+        const [prevTableSchema, setPrevTableSchema] = useState(table.schema);
+        if (table.schema !== prevTableSchema) {
+            setPrevTableSchema(table.schema);
             setSelectedSchemaId(
                 table.schema ? schemaNameToSchemaId(table.schema) : ''
             );
-        }, [table.schema]);
+        }
 
         const supportsSchemas = useMemo(
             () => databasesWithSchemas.includes(databaseType),
@@ -83,8 +85,16 @@ export const TableEditMode: React.FC<TableEditModeProps> = React.memo(
             [schemas]
         );
 
-        useEffect(() => {
+        // Sync focusFieldId when prop changes
+        const [prevFocusFieldIdProp, setPrevFocusFieldIdProp] =
+            useState(focusFieldIdProp);
+        if (focusFieldIdProp !== prevFocusFieldIdProp) {
+            setPrevFocusFieldIdProp(focusFieldIdProp);
             setFocusFieldId(focusFieldIdProp);
+        }
+
+        // Handle auto-focus behavior when field ID prop changes
+        useEffect(() => {
             if (!focusFieldIdProp) {
                 inputRef.current?.select();
             }
@@ -103,9 +113,10 @@ export const TableEditMode: React.FC<TableEditModeProps> = React.memo(
 
         useEffect(() => {
             // Trigger animation after mount
-            requestAnimationFrame(() => {
+            const rafId = requestAnimationFrame(() => {
                 setIsVisible(true);
             });
+            return () => cancelAnimationFrame(rafId);
         }, []);
 
         const scrollToFieldId = useCallback((fieldId: string) => {

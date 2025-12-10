@@ -103,29 +103,31 @@ export const CanvasFilter: React.FC<CanvasFilterProps> = ({ onClose }) => {
 
     // Sync expanded state with tree data changes - only expand NEW nodes
     useEffect(() => {
-        setExpanded((prev) => {
-            const currentNodeIds = new Set(treeData.map((n) => n.id));
-            let hasChanges = false;
-            const newExpanded: Record<string, boolean> = { ...prev };
+        requestAnimationFrame(() => {
+            setExpanded((prev) => {
+                const currentNodeIds = new Set(treeData.map((n) => n.id));
+                let hasChanges = false;
+                const newExpanded: Record<string, boolean> = { ...prev };
 
-            // Add any new nodes with expanded=true (preserve existing state)
-            treeData.forEach((node) => {
-                if (!(node.id in prev)) {
-                    newExpanded[node.id] = true;
-                    hasChanges = true;
-                }
+                // Add any new nodes with expanded=true (preserve existing state)
+                treeData.forEach((node) => {
+                    if (!(node.id in prev)) {
+                        newExpanded[node.id] = true;
+                        hasChanges = true;
+                    }
+                });
+
+                // Remove nodes that no longer exist (cleanup)
+                Object.keys(prev).forEach((id) => {
+                    if (!currentNodeIds.has(id)) {
+                        delete newExpanded[id];
+                        hasChanges = true;
+                    }
+                });
+
+                // Only update state if something actually changed (performance)
+                return hasChanges ? newExpanded : prev;
             });
-
-            // Remove nodes that no longer exist (cleanup)
-            Object.keys(prev).forEach((id) => {
-                if (!currentNodeIds.has(id)) {
-                    delete newExpanded[id];
-                    hasChanges = true;
-                }
-            });
-
-            // Only update state if something actually changed (performance)
-            return hasChanges ? newExpanded : prev;
         });
     }, [treeData]);
 
@@ -246,7 +248,7 @@ export const CanvasFilter: React.FC<CanvasFilterProps> = ({ onClose }) => {
 
     // Animate in on mount and focus search input
     useEffect(() => {
-        setIsFilterVisible(true);
+        requestAnimationFrame(() => setIsFilterVisible(true));
         // Focus the search input after a short delay to ensure the component is fully rendered
         setTimeout(() => {
             searchInputRef.current?.focus();

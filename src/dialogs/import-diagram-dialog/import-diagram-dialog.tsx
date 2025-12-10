@@ -42,8 +42,10 @@ export const ImportDiagramDialog: React.FC<ImportDiagramDialogProps> = ({
 
     useEffect(() => {
         if (!dialog.open) return;
-        setError(false);
-        setFile(null);
+        requestAnimationFrame(() => {
+            setError(false);
+            setFile(null);
+        });
     }, [dialog.open]);
     const { closeImportDiagramDialog, closeCreateDiagramDialog } = useDialog();
 

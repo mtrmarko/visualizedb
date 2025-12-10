@@ -17,9 +17,8 @@ const routes: RouteObject[] = [
     {
         path: '/',
         async lazy() {
-            const { RootLayout } = await import(
-                './components/root-layout/root-layout'
-            );
+            const { RootLayout } =
+                await import('./components/root-layout/root-layout');
             return {
                 element: <RootLayout />,
             };
@@ -31,9 +30,8 @@ const routes: RouteObject[] = [
                       {
                           path: 'login',
                           async lazy() {
-                              const { LoginPage } = await import(
-                                  './pages/login-page/login-page'
-                              );
+                              const { LoginPage } =
+                                  await import('./pages/login-page/login-page');
                               return {
                                   element: <LoginPage />,
                               };
@@ -42,9 +40,8 @@ const routes: RouteObject[] = [
                       {
                           path: 'signup',
                           async lazy() {
-                              const { SignupPage } = await import(
-                                  './pages/signup-page/signup-page'
-                              );
+                              const { SignupPage } =
+                                  await import('./pages/signup-page/signup-page');
                               return {
                                   element: <SignupPage />,
                               };
@@ -56,9 +53,8 @@ const routes: RouteObject[] = [
             ...['', 'diagrams/:diagramId'].map((path) => ({
                 path,
                 async lazy() {
-                    const { EditorPage } = await import(
-                        './pages/editor-page/editor-page'
-                    );
+                    const { EditorPage } =
+                        await import('./pages/editor-page/editor-page');
 
                     return {
                         element: protectRoute(<EditorPage />),
@@ -68,9 +64,8 @@ const routes: RouteObject[] = [
             {
                 path: 'examples',
                 async lazy() {
-                    const { ExamplesPage } = await import(
-                        './pages/examples-page/examples-page'
-                    );
+                    const { ExamplesPage } =
+                        await import('./pages/examples-page/examples-page');
                     return {
                         element: <ExamplesPage />,
                     };
@@ -80,9 +75,8 @@ const routes: RouteObject[] = [
                 id: 'templates',
                 path: 'templates',
                 async lazy() {
-                    const { TemplatesPage } = await import(
-                        './pages/templates-page/templates-page'
-                    );
+                    const { TemplatesPage } =
+                        await import('./pages/templates-page/templates-page');
                     return {
                         element: <TemplatesPage />,
                     };
@@ -101,9 +95,8 @@ const routes: RouteObject[] = [
                 id: 'templates_featured',
                 path: 'templates/featured',
                 async lazy() {
-                    const { TemplatesPage } = await import(
-                        './pages/templates-page/templates-page'
-                    );
+                    const { TemplatesPage } =
+                        await import('./pages/templates-page/templates-page');
                     return {
                         element: <TemplatesPage />,
                     };
@@ -123,9 +116,8 @@ const routes: RouteObject[] = [
                 id: 'templates_tags',
                 path: 'templates/tags/:tag',
                 async lazy() {
-                    const { TemplatesPage } = await import(
-                        './pages/templates-page/templates-page'
-                    );
+                    const { TemplatesPage } =
+                        await import('./pages/templates-page/templates-page');
                     return {
                         element: <TemplatesPage />,
                     };
@@ -147,17 +139,15 @@ const routes: RouteObject[] = [
                 id: 'templates_templateSlug',
                 path: 'templates/:templateSlug',
                 async lazy() {
-                    const { TemplatePage } = await import(
-                        './pages/template-page/template-page'
-                    );
+                    const { TemplatePage } =
+                        await import('./pages/template-page/template-page');
                     return {
                         element: <TemplatePage />,
                     };
                 },
                 loader: async ({ params }): Promise<TemplatePageLoaderData> => {
-                    const { templates } = await import(
-                        './templates-data/templates-data'
-                    );
+                    const { templates } =
+                        await import('./templates-data/templates-data');
                     return {
                         template: templates.find(
                             (template) => template.slug === params.templateSlug
@@ -169,17 +159,15 @@ const routes: RouteObject[] = [
                 id: 'templates_load',
                 path: 'templates/clone/:templateSlug',
                 async lazy() {
-                    const { CloneTemplatePage } = await import(
-                        './pages/clone-template-page/clone-template-page'
-                    );
+                    const { CloneTemplatePage } =
+                        await import('./pages/clone-template-page/clone-template-page');
                     return {
                         element: <CloneTemplatePage />,
                     };
                 },
                 loader: async ({ params }) => {
-                    const { templates } = await import(
-                        './templates-data/templates-data'
-                    );
+                    const { templates } =
+                        await import('./templates-data/templates-data');
                     return {
                         template: templates.find(
                             (template) => template.slug === params.templateSlug
@@ -190,9 +178,8 @@ const routes: RouteObject[] = [
             {
                 path: '*',
                 async lazy() {
-                    const { NotFoundPage } = await import(
-                        './pages/not-found-page/not-found-page'
-                    );
+                    const { NotFoundPage } =
+                        await import('./pages/not-found-page/not-found-page');
                     return {
                         element: <NotFoundPage />,
                     };

@@ -34,7 +34,7 @@ export const TableList: React.FC<TableListProps> = ({ tables }) => {
                     acc[table.id] = React.createRef();
                     return acc;
                 },
-                {} as Record<string, React.RefObject<HTMLDivElement>>
+                {} as Record<string, React.RefObject<HTMLDivElement | null>>
             ),
         [tables]
     );

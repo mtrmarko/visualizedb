@@ -21,7 +21,7 @@ export const RefsList: React.FC<RefsListProps> = ({ refs }) => {
             acc[ref.id] = React.createRef();
             return acc;
         },
-        {} as Record<string, React.RefObject<HTMLDivElement>>
+        {} as Record<string, React.RefObject<HTMLDivElement | null>>
     );
 
     const scrollToRef = useCallback(

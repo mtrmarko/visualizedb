@@ -5,7 +5,7 @@ import {
 } from '@/components/hover-card/hover-card';
 import { Label } from '@/components/label/label';
 import { Info, X } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import SSMSInstructions from '@/assets/ssms-instructions.png';
 import { ZoomableImage } from '@/components/zoomable-image/zoomable-image';
 import { useTranslation } from 'react-i18next';
@@ -22,37 +22,39 @@ export const SSMSInfo = React.forwardRef<
     const [open, setOpen] = React.useState(false);
     const { t } = useTranslation();
 
-    useEffect(() => {
-        if (controlledOpen) {
-            setOpen(true);
-        }
-    }, [controlledOpen]);
-
     const closeHandler = useCallback(() => {
-        setOpen(false);
-        setControlledOpen?.(false);
-    }, [setControlledOpen]);
+        if (controlledOpen !== undefined) {
+            setControlledOpen?.(false);
+        } else {
+            setOpen(false);
+        }
+    }, [setControlledOpen, controlledOpen]);
 
     const isOpen = useMemo(
-        () => open || controlledOpen,
+        () => controlledOpen ?? open,
         [open, controlledOpen]
     );
 
     return (
         <HoverCard
             open={isOpen}
-            onOpenChange={(isOpen) => {
-                if (controlledOpen) {
-                    return;
+            onOpenChange={(newOpen) => {
+                if (controlledOpen !== undefined) {
+                    setControlledOpen?.(newOpen);
+                } else {
+                    setOpen(newOpen);
                 }
-                setOpen(isOpen);
             }}
         >
             <HoverCardTrigger ref={ref} asChild>
                 <div
                     className="flex flex-row items-center gap-1 text-pink-600"
                     onClick={() => {
-                        setOpen?.(!open);
+                        if (controlledOpen !== undefined) {
+                            setControlledOpen?.(!isOpen);
+                        } else {
+                            setOpen(!isOpen);
+                        }
                     }}
                 >
                     <Info size={14} />

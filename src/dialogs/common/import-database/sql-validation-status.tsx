@@ -20,19 +20,19 @@ export const SQLValidationStatus: React.FC<SQLValidationStatusProps> = ({
     onErrorClick,
 }) => {
     const hasErrors = useMemo(
-        () => validation?.errors.length && validation.errors.length > 0,
-        [validation?.errors]
+        () => (validation?.errors?.length ?? 0) > 0,
+        [validation]
     );
     const hasWarnings = useMemo(
-        () => validation?.warnings && validation.warnings.length > 0,
-        [validation?.warnings]
+        () => (validation?.warnings?.length ?? 0) > 0,
+        [validation]
     );
     const wasAutoFixed = useMemo(
         () =>
             validation?.warnings?.some((w) =>
                 w.message.includes('Auto-fixed')
             ) || false,
-        [validation?.warnings]
+        [validation]
     );
 
     if (!validation && !errorMessage && !isAutoFixing) return null;

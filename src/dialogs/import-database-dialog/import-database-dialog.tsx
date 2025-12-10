@@ -49,13 +49,15 @@ export const ImportDatabaseDialog: React.FC<ImportDatabaseDialogProps> = ({
     >();
 
     useEffect(() => {
-        setDatabaseEdition(undefined);
+        requestAnimationFrame(() => setDatabaseEdition(undefined));
     }, [databaseType]);
 
     useEffect(() => {
         if (!dialog.open) return;
-        setDatabaseEdition(undefined);
-        setScriptResult('');
+        requestAnimationFrame(() => {
+            setDatabaseEdition(undefined);
+            setScriptResult('');
+        });
     }, [dialog.open]);
 
     const importDatabase = useCallback(async () => {

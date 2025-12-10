@@ -48,12 +48,7 @@ export const TableNodeDependencyIndicator: React.FC<TableNodeDependencyIndicator
                     connection.fromHandle.id?.startsWith(
                         LEFT_HANDLE_ID_PREFIX
                     )),
-            [
-                connection.inProgress,
-                connection.fromNode?.id,
-                connection.fromHandle?.id,
-                table.id,
-            ]
+            [connection, table.id]
         );
 
         const numberOfEdgesToTable = useMemo(

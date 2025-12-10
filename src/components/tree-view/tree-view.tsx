@@ -94,26 +94,30 @@ export function TreeView<
     useEffect(() => {
         if (selectable?.enabled && selectable.defaultSelectedId) {
             if (selectable.defaultSelectedId === selectedId) return;
-            setSelectedId(selectable.defaultSelectedId);
-            const { node, path } = findNodeById(
-                data,
-                selectable.defaultSelectedId
-            );
 
-            if (node) {
-                selectable.onSelectedChange?.(node);
+            // Defer the state update to avoid synchronous set-state-in-effect warning
+            requestAnimationFrame(() => {
+                setSelectedId(selectable.defaultSelectedId!);
+                const { node, path } = findNodeById(
+                    data,
+                    selectable.defaultSelectedId!
+                );
 
-                // Expand all parent nodes
-                for (const parent of path) {
-                    if (expanded[parent.id]) continue;
-                    toggleNode(
-                        parent.id,
-                        parent.type,
-                        parent.context,
-                        parent.children
-                    );
+                if (node) {
+                    selectable.onSelectedChange?.(node);
+
+                    // Expand all parent nodes
+                    for (const parent of path) {
+                        if (expanded[parent.id]) continue;
+                        toggleNode(
+                            parent.id,
+                            parent.type,
+                            parent.context,
+                            parent.children
+                        );
+                    }
                 }
-            }
+            });
         }
     }, [selectable, toggleNode, selectedId, data, expanded, setSelectedId]);
 

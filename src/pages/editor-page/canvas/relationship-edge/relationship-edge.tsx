@@ -188,7 +188,7 @@ export const RelationshipEdge: React.FC<EdgeProps<RelationshipEdgeType>> =
                               relationshipId: relationship.id,
                           })
                         : false,
-                [checkIfNewRelationship, relationship?.id]
+                [checkIfNewRelationship, relationship]
             );
 
             const isDiffRelationshipRemoved = useMemo(
@@ -198,7 +198,7 @@ export const RelationshipEdge: React.FC<EdgeProps<RelationshipEdgeType>> =
                               relationshipId: relationship.id,
                           })
                         : false,
-                [checkIfRelationshipRemoved, relationship?.id]
+                [checkIfRelationshipRemoved, relationship]
             );
 
             return (

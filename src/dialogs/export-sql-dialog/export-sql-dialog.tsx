@@ -144,8 +144,10 @@ export const ExportSQLDialog: React.FC<ExportSQLDialogProps> = ({
             return;
         }
         abortControllerRef.current = new AbortController();
-        setScript(undefined);
-        setError(false);
+        requestAnimationFrame(() => {
+            setScript(undefined);
+            setError(false);
+        });
         const fetchScript = async () => {
             try {
                 setIsScriptLoading(true);
