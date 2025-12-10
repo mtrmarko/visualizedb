@@ -97,7 +97,9 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
     const { effectiveTheme } = useTheme();
     const [errorMessage, setErrorMessage] = useState('');
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-    const decorationsCollection = useRef<editor.IEditorDecorationsCollection>();
+    const decorationsCollection = useRef<
+        editor.IEditorDecorationsCollection | undefined
+    >(undefined);
     const pasteDisposableRef = useRef<IDisposable | null>(null);
 
     const { t } = useTranslation();

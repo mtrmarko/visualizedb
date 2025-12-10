@@ -35,7 +35,7 @@ export const CustomTypeList: React.FC<CustomTypeProps> = ({ customTypes }) => {
                     acc[customType.id] = React.createRef();
                     return acc;
                 },
-                {} as Record<string, React.RefObject<HTMLDivElement>>
+                {} as Record<string, React.RefObject<HTMLDivElement | null>>
             ),
         [customTypes]
     );

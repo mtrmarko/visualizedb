@@ -53,7 +53,7 @@ export const CanvasProvider = ({ children }: CanvasProviderProps) => {
 
     const [hoveringTableId, setHoveringTableId] = useState<string | null>(null);
 
-    const diagramIdActiveFilterRef = useRef<string>();
+    const diagramIdActiveFilterRef = useRef<string | undefined>(undefined);
 
     useEffect(() => {
         if (filterLoading) {

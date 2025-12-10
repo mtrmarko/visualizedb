@@ -830,7 +830,10 @@ export async function fromPostgres(
                                 | number
                                 | undefined;
 
-                            if (upperType === 'SERIAL') {
+                            if (
+                                upperType === 'SERIAL' ||
+                                upperType === 'SERIAL4'
+                            ) {
                                 // Use length to determine the actual serial type
                                 if (typeLength === 2) {
                                     normalizedBaseType = 'SMALLINT';
@@ -843,6 +846,18 @@ export async function fromPostgres(
                                     normalizedBaseType = 'INTEGER';
                                     isSerialType = true;
                                 }
+                            } else if (
+                                upperType === 'SMALLSERIAL' ||
+                                upperType === 'SERIAL2'
+                            ) {
+                                normalizedBaseType = 'SMALLINT';
+                                isSerialType = true;
+                            } else if (
+                                upperType === 'BIGSERIAL' ||
+                                upperType === 'SERIAL8'
+                            ) {
+                                normalizedBaseType = 'BIGINT';
+                                isSerialType = true;
                             } else if (upperType === 'INT') {
                                 // Use length to determine the actual int type
                                 if (typeLength === 2) {

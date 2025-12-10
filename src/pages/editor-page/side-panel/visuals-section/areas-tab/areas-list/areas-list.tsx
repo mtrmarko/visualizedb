@@ -33,7 +33,7 @@ export const AreaList: React.FC<AreaListProps> = ({ areas }) => {
                     acc[area.id] = React.createRef();
                     return acc;
                 },
-                {} as Record<string, React.RefObject<HTMLDivElement>>
+                {} as Record<string, React.RefObject<HTMLDivElement | null>>
             ),
         [areas]
     );
