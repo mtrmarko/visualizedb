@@ -66,7 +66,7 @@ export const CanvasProvider = ({ children }: CanvasProviderProps) => {
 
         diagramIdActiveFilterRef.current = diagramId;
 
-        setShowFilter(true);
+        setTimeout(() => setShowFilter(true), 0);
     }, [filterLoading, diagramId]);
 
     const reorderTables = useCallback(

@@ -46,9 +46,11 @@ export const ExportImageDialog: React.FC<ExportImageDialogProps> = ({
 
     useEffect(() => {
         if (!dialog.open) return;
-        setScale(DEFAULT_SCALE);
-        setIncludePatternBG(DEFAULT_INCLUDE_PATTERN_BG);
-        setTransparent(DEFAULT_TRANSPARENT);
+        requestAnimationFrame(() => {
+            setScale(DEFAULT_SCALE);
+            setIncludePatternBG(DEFAULT_INCLUDE_PATTERN_BG);
+            setTransparent(DEFAULT_TRANSPARENT);
+        });
     }, [dialog.open]);
     const { closeExportImageDialog } = useDialog();
 

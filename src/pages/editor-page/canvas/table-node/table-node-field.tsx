@@ -91,12 +91,7 @@ export const TableNodeField: React.FC<TableNodeFieldProps> = React.memo(
                     connection.fromHandle.id?.startsWith(
                         LEFT_HANDLE_ID_PREFIX
                     )),
-            [
-                connection.inProgress,
-                connection.fromNode?.id,
-                connection.fromHandle?.id,
-                tableNodeId,
-            ]
+            [connection, tableNodeId]
         );
         const isTargetFromView = useMemo(
             () =>
@@ -108,12 +103,7 @@ export const TableNodeField: React.FC<TableNodeFieldProps> = React.memo(
                     connection.fromHandle.id?.startsWith(
                         BOTTOM_SOURCE_HANDLE_ID_PREFIX
                     )),
-            [
-                connection.inProgress,
-                connection.fromNode?.id,
-                connection.fromHandle?.id,
-                tableNodeId,
-            ]
+            [connection, tableNodeId]
         );
 
         const numberOfEdgesToField = useMemo(() => {

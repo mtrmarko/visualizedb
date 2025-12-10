@@ -32,7 +32,7 @@ export const ExportDiagramDialog: React.FC<ExportDiagramDialogProps> = ({
 
     useEffect(() => {
         if (!dialog.open) return;
-        setError(false);
+        requestAnimationFrame(() => setError(false));
     }, [dialog.open]);
 
     const { exportDiagram, isExporting: isLoading } = useExportDiagram();

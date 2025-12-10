@@ -58,7 +58,7 @@ export const TableEditModeField: React.FC<TableEditModeFieldProps> = React.memo(
 
                 return () => clearTimeout(timer);
             } else {
-                setShowHighlight(false);
+                requestAnimationFrame(() => setShowHighlight(false));
             }
         }, [focused]);
 

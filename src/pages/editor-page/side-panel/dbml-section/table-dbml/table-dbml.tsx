@@ -149,19 +149,21 @@ export const TableDBML: React.FC<TableDBMLProps> = () => {
 
         if (foundInvalidFields) {
             const tableNamesString = Array.from(invalidTableNames).join(', ');
-            setWarningMessage(
-                `Some fields had empty names in tables: [${tableNamesString}] and were excluded from the DBML export.`
-            );
+            requestAnimationFrame(() => {
+                setWarningMessage(
+                    `Some fields had empty names in tables: [${tableNamesString}] and were excluded from the DBML export.`
+                );
+            });
         }
     }, [currentDiagram.tables, t, isEditMode]);
 
     useEffect(() => {
         if (isEditMode) {
-            setIsLoading(false);
+            requestAnimationFrame(() => setIsLoading(false));
             return;
         }
 
-        setErrorMessage(undefined);
+        requestAnimationFrame(() => setErrorMessage(undefined));
         clearErrorHighlight(decorationsCollection.current);
 
         const generateDBML = async () => {
@@ -189,8 +191,10 @@ export const TableDBML: React.FC<TableDBMLProps> = () => {
     // Update editedDbml when dbmlToDisplay changes
     useEffect(() => {
         if (!isLoading && dbmlToDisplay && !isEditMode) {
-            setEditedDbml(dbmlToDisplay);
-            lastDBMLChange.current = dbmlToDisplay;
+            requestAnimationFrame(() => {
+                setEditedDbml(dbmlToDisplay);
+                lastDBMLChange.current = dbmlToDisplay;
+            });
         }
     }, [dbmlToDisplay, isLoading, isEditMode]);
 

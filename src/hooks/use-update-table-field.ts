@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useVisualizeDB } from './use-visualizedb';
 import { useDebounce } from './use-debounce-v2';
 import type { DatabaseType, DBField, DBTable } from '@/lib/domain';
@@ -88,20 +88,25 @@ export const useUpdateTableField = (
     const [localNullable, setLocalNullable] = useState(field.nullable);
     const [localPrimaryKey, setLocalPrimaryKey] = useState(field.primaryKey);
 
-    const lastFieldNameRef = useRef<string>(field.name);
+    // Track previous props to sync state during render
+    const [prevFieldName, setPrevFieldName] = useState(field.name);
+    const [prevNullable, setPrevNullable] = useState(field.nullable);
+    const [prevPrimaryKey, setPrevPrimaryKey] = useState(field.primaryKey);
 
-    useEffect(() => {
-        if (localFieldName === lastFieldNameRef.current) {
-            lastFieldNameRef.current = field.name;
-            setLocalFieldName(field.name);
-        }
-    }, [field.name, localFieldName]);
+    if (field.name !== prevFieldName) {
+        setPrevFieldName(field.name);
+        setLocalFieldName(field.name);
+    }
 
-    // Update local state when field properties change externally
-    useEffect(() => {
+    if (field.nullable !== prevNullable) {
+        setPrevNullable(field.nullable);
         setLocalNullable(field.nullable);
+    }
+
+    if (field.primaryKey !== prevPrimaryKey) {
+        setPrevPrimaryKey(field.primaryKey);
         setLocalPrimaryKey(field.primaryKey);
-    }, [field.nullable, field.primaryKey]);
+    }
 
     // Use custom updateField if provided, otherwise use the visualizeDB one
     const updateField = useMemo(

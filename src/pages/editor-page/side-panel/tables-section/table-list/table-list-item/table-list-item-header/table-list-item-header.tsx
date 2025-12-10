@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
     CircleDotDashed,
     GripVertical,
@@ -63,6 +63,13 @@ export const TableListItemHeader: React.FC<TableListItemHeaderProps> = ({
     const { focusOnTable } = useFocusOn();
     const [editMode, setEditMode] = React.useState(false);
     const [tableName, setTableName] = React.useState(table.name);
+    const [prevTableName, setPrevTableName] = React.useState(table.name);
+
+    if (table.name !== prevTableName) {
+        setPrevTableName(table.name);
+        setTableName(table.name.trim());
+    }
+
     const inputRef = React.useRef<HTMLInputElement>(null);
     const { listeners } = useSortable({ id: table.id });
 
@@ -242,12 +249,6 @@ export const TableListItemHeader: React.FC<TableListItemHeaderProps> = ({
             return table.schema ?? defaultSchemas[databaseType];
         }
     }, [table.schema, schemasDisplayed.length, databaseType]);
-
-    useEffect(() => {
-        if (table.name.trim()) {
-            setTableName(table.name.trim());
-        }
-    }, [table.name]);
 
     return (
         <div className="group flex h-11 flex-1 items-center justify-between gap-1 overflow-hidden">

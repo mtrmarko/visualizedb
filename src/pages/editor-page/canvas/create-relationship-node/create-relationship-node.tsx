@@ -61,10 +61,12 @@ export const CreateRelationshipNode: React.FC<
     // Get compatible target fields (FK columns)
     // Reset state when source or target table changes
     useEffect(() => {
-        setTargetFieldId(undefined);
-        setSearchTerm('');
-        setErrorMessage('');
-        setSelectOpen(true);
+        requestAnimationFrame(() => {
+            setTargetFieldId(undefined);
+            setSearchTerm('');
+            setErrorMessage('');
+            setSelectOpen(true);
+        });
     }, [sourceTableId, targetTableId]);
 
     const targetFieldOptions = useMemo(() => {
@@ -106,21 +108,23 @@ export const CreateRelationshipNode: React.FC<
 
     // Auto-select first compatible field OR pre-populate suggested name
     useEffect(() => {
-        if (targetFieldOptions.length > 0 && !targetFieldId) {
-            setTargetFieldId(targetFieldOptions[0].value as string);
-        } else if (
-            targetFieldOptions.length === 0 &&
-            !searchTerm &&
-            sourceTable &&
-            sourcePKField
-        ) {
-            // No compatible fields - suggest a field name based on source table + PK field
-            const suggestedName =
-                sourcePKField.name.toLowerCase() === 'id'
-                    ? `${sourceTable.name}_${sourcePKField.name}`
-                    : sourcePKField.name;
-            setSearchTerm(suggestedName);
-        }
+        requestAnimationFrame(() => {
+            if (targetFieldOptions.length > 0 && !targetFieldId) {
+                setTargetFieldId(targetFieldOptions[0].value as string);
+            } else if (
+                targetFieldOptions.length === 0 &&
+                !searchTerm &&
+                sourceTable &&
+                sourcePKField
+            ) {
+                // No compatible fields - suggest a field name based on source table + PK field
+                const suggestedName =
+                    sourcePKField.name.toLowerCase() === 'id'
+                        ? `${sourceTable.name}_${sourcePKField.name}`
+                        : sourcePKField.name;
+                setSearchTerm(suggestedName);
+            }
+        });
     }, [
         targetFieldOptions.length,
         sourceTable,
@@ -132,7 +136,7 @@ export const CreateRelationshipNode: React.FC<
 
     // Auto-open the select immediately and trigger animation
     useEffect(() => {
-        setSelectOpen(true);
+        requestAnimationFrame(() => setSelectOpen(true));
         const rafId = requestAnimationFrame(() => {
             setIsVisible(true);
         });

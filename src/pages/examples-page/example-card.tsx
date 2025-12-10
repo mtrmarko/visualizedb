@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import type { Example } from './examples-data/examples-data';
 import { randomColor } from '@/lib/colors';
 import { Import } from 'lucide-react';
@@ -28,7 +28,7 @@ export const ExampleCard: React.FC<ExampleCardProps> = ({
     loading,
 }) => {
     const { effectiveTheme } = useTheme();
-    const color = useRef(randomColor());
+    const [color] = React.useState(() => randomColor());
 
     return (
         <div
@@ -37,7 +37,7 @@ export const ExampleCard: React.FC<ExampleCardProps> = ({
         >
             <div
                 className="h-4 rounded-t-[10px]"
-                style={{ backgroundColor: color.current }}
+                style={{ backgroundColor: color }}
             ></div>
             <div className="flex h-12 items-center justify-between bg-slate-200 px-2 dark:bg-slate-900">
                 <div className="flex items-center gap-2">

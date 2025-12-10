@@ -4,6 +4,7 @@ import React, {
     useEffect,
     useState,
     useRef,
+    useMemo,
 } from 'react';
 import { Button } from '@/components/button/button';
 import {
@@ -37,10 +38,7 @@ import { InstructionsSection } from './instructions-section/instructions-section
 import { parseSQLError } from '@/lib/data/sql-import';
 import type { editor, IDisposable } from 'monaco-editor';
 import { waitFor } from '@/lib/utils';
-import {
-    validateSQL,
-    type ValidationResult,
-} from '@/lib/data/sql-import/sql-validator';
+import { validateSQL } from '@/lib/data/sql-import/sql-validator';
 import { SQLValidationStatus } from './sql-validation-status';
 import { setupDBMLLanguage } from '@/components/code-snippet/languages/dbml-language';
 import type { ImportMethod } from '@/lib/import-method/import-method';
@@ -95,7 +93,8 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
     setImportMethod,
 }) => {
     const { effectiveTheme } = useTheme();
-    const [errorMessage, setErrorMessage] = useState('');
+    // Manual error message (e.g. from JSON check action)
+    const [manualErrorMessage, setManualErrorMessage] = useState('');
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const decorationsCollection = useRef<
         editor.IEditorDecorationsCollection | undefined
@@ -108,109 +107,134 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
     const [showCheckJsonButton, setShowCheckJsonButton] = useState(false);
     const [isCheckingJson, setIsCheckingJson] = useState(false);
     const [showSSMSInfoDialog, setShowSSMSInfoDialog] = useState(false);
-    const [sqlValidation, setSqlValidation] = useState<ValidationResult | null>(
-        null
-    );
+
+    // Async validation error state
+    const [asyncErrorMessage, setAsyncErrorMessage] = useState<string>('');
     const [isAutoFixing, setIsAutoFixing] = useState(false);
-    const [showAutoFixButton, setShowAutoFixButton] = useState(false);
 
     const clearDecorations = useCallback(() => {
         clearErrorHighlight(decorationsCollection.current);
     }, []);
 
-    useEffect(() => {
-        setScriptResult('');
-        setErrorMessage('');
-        setShowCheckJsonButton(false);
-    }, [importMethod, setScriptResult]);
+    const handleImportMethodChange = useCallback(
+        (newMethod: ImportMethod) => {
+            setImportMethod(newMethod);
+            setScriptResult('');
+            setManualErrorMessage('');
+            setAsyncErrorMessage('');
+            setShowCheckJsonButton(false);
+            clearDecorations();
+        },
+        [setImportMethod, setScriptResult, clearDecorations]
+    );
 
-    // Check if the ddl or dbml is valid
-    useEffect(() => {
-        clearDecorations();
-        if (importMethod === 'query') {
-            setSqlValidation(null);
-            setShowAutoFixButton(false);
-            return;
-        }
-
-        if (!scriptResult.trim()) {
-            setSqlValidation(null);
-            setShowAutoFixButton(false);
-            setErrorMessage('');
-            return;
+    // Synchronous validation logic using useMemo
+    const syncValidationResult = useMemo(() => {
+        if (!scriptResult.trim() || importMethod === 'query') {
+            return null;
         }
 
         if (importMethod === 'dbml') {
-            // Validate DBML by parsing it
             const validateResponse = verifyDBML(scriptResult, { databaseType });
             if (!validateResponse.hasError) {
-                setErrorMessage('');
-                setSqlValidation({
+                return {
                     isValid: true,
                     errors: [],
                     warnings: [],
-                });
+                    errorMessage: '',
+                    fixedSQL: undefined,
+                };
             } else {
-                let errorMsg = 'Invalid DBML syntax';
-                let line: number = 1;
-
-                if (validateResponse.parsedError) {
-                    errorMsg = validateResponse.parsedError.message;
-                    line = validateResponse.parsedError.line;
-                    highlightErrorLine({
-                        error: validateResponse.parsedError,
-                        model: editorRef.current?.getModel(),
-                        editorDecorationsCollection:
-                            decorationsCollection.current,
-                    });
-                }
-
-                setSqlValidation({
+                return {
                     isValid: false,
                     errors: [
                         {
-                            message: errorMsg,
-                            line: line,
+                            message:
+                                validateResponse.parsedError?.message ||
+                                'Invalid DBML syntax',
+                            line: validateResponse.parsedError?.line || 1,
                             type: 'syntax' as const,
                         },
                     ],
                     warnings: [],
-                });
-                setErrorMessage(errorMsg);
+                    errorMessage:
+                        validateResponse.parsedError?.message ||
+                        'Invalid DBML syntax',
+                    parsedError: validateResponse.parsedError,
+                    fixedSQL: undefined,
+                };
             }
-
-            setShowAutoFixButton(false);
-            return;
         }
 
         // SQL validation
-        // First run our validation based on database type
         const validation = validateSQL(scriptResult, databaseType);
-        setSqlValidation(validation);
+        return {
+            ...validation,
+            errorMessage:
+                validation.fixedSQL && validation.errors.length > 0
+                    ? 'SQL contains syntax errors'
+                    : '',
+        };
+    }, [scriptResult, importMethod, databaseType]);
 
-        // If we have auto-fixable errors, show the auto-fix button
-        if (validation.fixedSQL && validation.errors.length > 0) {
-            setShowAutoFixButton(true);
-            // Don't try to parse invalid SQL
-            setErrorMessage('SQL contains syntax errors');
-            return;
+    const showAutoFixButton = useMemo(
+        () =>
+            !!(
+                syncValidationResult &&
+                syncValidationResult.fixedSQL &&
+                syncValidationResult.errors.length > 0
+            ),
+        [syncValidationResult]
+    );
+
+    // Derived error message
+    const displayErrorMessage = useMemo(() => {
+        if (syncValidationResult?.errorMessage) {
+            return syncValidationResult.errorMessage;
         }
+        if (asyncErrorMessage) {
+            return asyncErrorMessage;
+        }
+        return manualErrorMessage;
+    }, [syncValidationResult, asyncErrorMessage, manualErrorMessage]);
 
-        // Hide auto-fix button if no fixes available
-        setShowAutoFixButton(false);
+    // Handle DBML highlighting (side effect of validation)
+    useEffect(() => {
+        if (
+            syncValidationResult?.parsedError &&
+            importMethod === 'dbml' &&
+            editorRef.current
+        ) {
+            highlightErrorLine({
+                error: syncValidationResult.parsedError,
+                model: editorRef.current.getModel(),
+                editorDecorationsCollection: decorationsCollection.current,
+            });
+        } else {
+            clearDecorations();
+        }
+    }, [syncValidationResult, importMethod, clearDecorations]);
 
-        // Validate the SQL (either original or already fixed)
-        parseSQLError({
-            sqlContent: scriptResult,
-            sourceDatabaseType: databaseType,
-        }).then((result) => {
-            if (result.success) {
-                setErrorMessage('');
-            } else if (!result.success && result.error) {
-                setErrorMessage(result.error);
-            }
-        });
-    }, [importMethod, scriptResult, databaseType, clearDecorations]);
+    // Async SQL validation
+    useEffect(() => {
+        requestAnimationFrame(() => setAsyncErrorMessage('')); // Reset async error when dependencies change
+
+        if (
+            importMethod === 'ddl' &&
+            syncValidationResult &&
+            !syncValidationResult.errorMessage &&
+            !syncValidationResult.errors.length
+        ) {
+            parseSQLError({
+                sqlContent: scriptResult,
+                sourceDatabaseType: databaseType,
+            }).then((result) => {
+                if (!result.success && result.error) {
+                    setAsyncErrorMessage(result.error);
+                }
+            });
+        }
+    }, [importMethod, scriptResult, databaseType, syncValidationResult]);
 
     // Check if the script result is a valid JSON
     useEffect(() => {
@@ -219,48 +243,59 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
         }
 
         if (scriptResult.trim().length === 0) {
-            setErrorMessage('');
-            setShowCheckJsonButton(false);
+            requestAnimationFrame(() => {
+                setManualErrorMessage('');
+                setShowCheckJsonButton(false);
+            });
             return;
         }
 
         if (isStringMetadataJson(scriptResult)) {
-            setErrorMessage('');
-            setShowCheckJsonButton(false);
+            requestAnimationFrame(() => {
+                setManualErrorMessage('');
+                setShowCheckJsonButton(false);
+            });
         } else if (
             scriptResult.trim().includes('{') &&
             scriptResult.trim().includes('}')
         ) {
-            setShowCheckJsonButton(true);
-            setErrorMessage('');
+            requestAnimationFrame(() => {
+                setShowCheckJsonButton(true);
+                setManualErrorMessage('');
+            });
         } else {
-            setErrorMessage(errorScriptOutputMessage);
-            setShowCheckJsonButton(false);
+            requestAnimationFrame(() => {
+                setManualErrorMessage(errorScriptOutputMessage);
+                setShowCheckJsonButton(false);
+            });
         }
     }, [scriptResult, importMethod]);
 
     const handleImport = useCallback(() => {
-        if (errorMessage.length === 0 && scriptResult.trim().length !== 0) {
+        if (
+            displayErrorMessage.length === 0 &&
+            scriptResult.trim().length !== 0
+        ) {
             onImport();
         }
-    }, [errorMessage.length, onImport, scriptResult]);
+    }, [displayErrorMessage.length, onImport, scriptResult]);
 
     const handleAutoFix = useCallback(() => {
-        if (sqlValidation?.fixedSQL) {
+        if (syncValidationResult?.fixedSQL) {
             setIsAutoFixing(true);
-            setShowAutoFixButton(false);
-            setErrorMessage('');
+            setManualErrorMessage('');
+            setAsyncErrorMessage('');
 
             // Apply the fix with a delay so user sees the fixing message
             setTimeout(() => {
-                setScriptResult(sqlValidation.fixedSQL!);
+                setScriptResult(syncValidationResult.fixedSQL!);
 
                 setTimeout(() => {
                     setIsAutoFixing(false);
                 }, 100);
             }, 1000);
         }
-    }, [sqlValidation, setScriptResult]);
+    }, [syncValidationResult, setScriptResult]);
 
     const handleErrorClick = useCallback((line: number) => {
         if (editorRef.current) {
@@ -313,11 +348,11 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
 
         if (isStringMetadataJson(fixedJson)) {
             setScriptResult(fixedJson);
-            setErrorMessage('');
+            setManualErrorMessage('');
             formatEditor();
         } else {
             setScriptResult(fixedJson);
-            setErrorMessage(errorScriptOutputMessage);
+            setManualErrorMessage(errorScriptOutputMessage);
             formatEditor();
         }
 
@@ -360,8 +395,8 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                 // First, detect content type to determine if we should switch modes
                 const detectedType = detectImportMethod(content);
                 if (detectedType && detectedType !== importMethod) {
-                    // Switch to the detected mode immediately
-                    setImportMethod(detectedType);
+                    // Switch to the detected mode immediately using the handler
+                    handleImportMethodChange(detectedType);
 
                     // Only format if it's JSON (query mode) AND file is not too large
                     if (detectedType === 'query' && !isLargeFile) {
@@ -389,7 +424,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
 
             pasteDisposableRef.current = disposable;
         },
-        [importMethod, setImportMethod]
+        [importMethod, handleImportMethodChange]
     );
 
     const renderHeader = useCallback(() => {
@@ -407,7 +442,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                 databaseType={databaseType}
                 importMethod={importMethod}
                 setDatabaseEdition={setDatabaseEdition}
-                setImportMethod={setImportMethod}
+                setImportMethod={handleImportMethodChange}
                 databaseEdition={databaseEdition}
                 setShowSSMSInfoDialog={setShowSSMSInfoDialog}
                 showSSMSInfoDialog={showSSMSInfoDialog}
@@ -417,7 +452,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
             databaseType,
             importMethod,
             setDatabaseEdition,
-            setImportMethod,
+            handleImportMethodChange,
             databaseEdition,
             setShowSSMSInfoDialog,
             showSSMSInfoDialog,
@@ -483,12 +518,12 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                     </Suspense>
                 </div>
 
-                {errorMessage ||
+                {displayErrorMessage ||
                 ((importMethod === 'ddl' || importMethod === 'dbml') &&
-                    sqlValidation) ? (
+                    syncValidationResult) ? (
                     <SQLValidationStatus
-                        validation={sqlValidation}
-                        errorMessage={errorMessage}
+                        validation={syncValidationResult}
+                        errorMessage={displayErrorMessage}
                         isAutoFixing={isAutoFixing}
                         onErrorClick={handleErrorClick}
                     />
@@ -496,13 +531,13 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
             </div>
         ),
         [
-            errorMessage,
+            displayErrorMessage,
             scriptResult,
             importMethod,
             effectiveTheme,
             debouncedHandleInputChange,
             handleEditorDidMount,
-            sqlValidation,
+            syncValidationResult,
             isAutoFixing,
             handleErrorClick,
         ]
@@ -610,7 +645,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                             variant="default"
                             disabled={
                                 scriptResult.trim().length === 0 ||
-                                errorMessage.length > 0 ||
+                                displayErrorMessage.length > 0 ||
                                 isAutoFixing
                             }
                             onClick={handleImport}
@@ -624,7 +659,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
                                 variant="default"
                                 disabled={
                                     scriptResult.trim().length === 0 ||
-                                    errorMessage.length > 0 ||
+                                    displayErrorMessage.length > 0 ||
                                     isAutoFixing
                                 }
                                 onClick={handleImport}
@@ -651,7 +686,7 @@ export const ImportDatabase: React.FC<ImportDatabaseProps> = ({
         isDesktop,
         keepDialogAfterImport,
         onCreateEmptyDiagram,
-        errorMessage.length,
+        displayErrorMessage.length,
         scriptResult,
         showCheckJsonButton,
         isCheckingJson,

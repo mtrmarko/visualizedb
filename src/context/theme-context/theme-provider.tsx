@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import type { EffectiveTheme } from './theme-context';
+import React, { useEffect, useCallback } from 'react';
 import { ThemeContext } from './theme-context';
 import { useMediaQuery } from 'react-responsive';
 import { useLocalConfig } from '@/hooks/use-local-config';
@@ -19,12 +18,7 @@ export const ThemeProvider: React.FC<React.PropsWithChildren> = ({
 
     const systemTheme = isDarkSystemTheme ? 'dark' : 'light';
 
-    const [effectiveTheme, setEffectiveTheme] =
-        useState<EffectiveTheme>(systemTheme);
-
-    useEffect(() => {
-        setEffectiveTheme(theme === 'system' ? systemTheme : theme);
-    }, [theme, systemTheme]);
+    const effectiveTheme = theme === 'system' ? systemTheme : theme;
 
     useEffect(() => {
         if (effectiveTheme === 'dark') {

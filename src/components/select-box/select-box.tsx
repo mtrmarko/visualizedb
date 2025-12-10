@@ -18,7 +18,6 @@ import {
 } from '@/components/popover/popover';
 import { ScrollArea } from '@/components/scroll-area/scroll-area';
 import { useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
 
 export interface SelectBoxOption {
     value: string;
@@ -93,25 +92,26 @@ export const SelectBox = React.forwardRef<HTMLInputElement, SelectBoxProps>(
         ref
     ) => {
         const [searchTerm, setSearchTerm] = React.useState<string>('');
-        const [isOpen, setIsOpen] = React.useState(open ?? false);
+        const [internalOpen, setInternalOpen] = React.useState(false);
         const { t } = useTranslation();
 
-        useEffect(() => {
-            setIsOpen(open ?? false);
-        }, [open]);
+        const isControlled = open !== undefined;
+        const isOpen = isControlled ? open : internalOpen;
 
         const onOpenChange = React.useCallback(
-            (isOpen: boolean) => {
-                setOpen?.(isOpen);
-                setIsOpen(isOpen);
+            (newOpen: boolean) => {
+                setOpen?.(newOpen);
+                if (!isControlled) {
+                    setInternalOpen(newOpen);
+                }
 
-                if (isOpen) {
+                if (newOpen) {
                     setSearchTerm('');
                 }
 
                 setTimeout(() => (document.body.style.pointerEvents = ''), 500);
             },
-            [setOpen]
+            [setOpen, isControlled]
         );
 
         const handleSelect = React.useCallback(
@@ -124,10 +124,10 @@ export const SelectBox = React.forwardRef<HTMLInputElement, SelectBoxProps>(
                     onChange?.(newValue);
                 } else {
                     onChange?.(selectedValue, regexMatches);
-                    setIsOpen(false);
+                    onOpenChange(false);
                 }
             },
-            [multiple, onChange, value]
+            [multiple, onChange, value, onOpenChange]
         );
 
         const handleClear = React.useCallback(() => {

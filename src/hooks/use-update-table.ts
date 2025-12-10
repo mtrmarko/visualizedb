@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState } from 'react';
 import { useVisualizeDB } from './use-visualizedb';
 import { useDebounce } from './use-debounce-v2';
 import type { DBTable } from '@/lib/domain';
@@ -7,6 +7,12 @@ import type { DBTable } from '@/lib/domain';
 export const useUpdateTable = (table: DBTable) => {
     const { updateTable: visualizeDBUpdateTable } = useVisualizeDB();
     const [localTableName, setLocalTableName] = useState(table.name);
+    const [prevTableName, setPrevTableName] = useState(table.name);
+
+    if (table.name !== prevTableName) {
+        setPrevTableName(table.name);
+        setLocalTableName(table.name);
+    }
 
     // Debounced update function
     const debouncedUpdate = useDebounce(
@@ -29,11 +35,6 @@ export const useUpdateTable = (table: DBTable) => {
         },
         [debouncedUpdate]
     );
-
-    // Update local state when table name changes externally
-    useEffect(() => {
-        setLocalTableName(table.name);
-    }, [table.name]);
 
     return {
         tableName: localTableName,

@@ -70,17 +70,19 @@ export const TableSchemaDialog: React.FC<TableSchemaDialogProps> = ({
 
     useEffect(() => {
         if (!dialog.open) return;
-        setSelectedSchemaId(
-            table?.schema
-                ? schemaNameToSchemaId(table.schema)
-                : (schemas?.[0]?.id ?? '')
-        );
-        setIsCreatingNew(!allowSchemaSelection);
-        setNewSchemaName(
-            allowSchemaCreation && !allowSchemaSelection
-                ? (defaultSchemaName ?? '')
-                : ''
-        );
+        requestAnimationFrame(() => {
+            setSelectedSchemaId(
+                table?.schema
+                    ? schemaNameToSchemaId(table.schema)
+                    : (schemas?.[0]?.id ?? '')
+            );
+            setIsCreatingNew(!allowSchemaSelection);
+            setNewSchemaName(
+                allowSchemaCreation && !allowSchemaSelection
+                    ? (defaultSchemaName ?? '')
+                    : ''
+            );
+        });
     }, [
         defaultSchemaName,
         dialog.open,
