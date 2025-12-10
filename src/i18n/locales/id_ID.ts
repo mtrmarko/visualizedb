@@ -470,7 +470,7 @@ export const id_ID: LanguageTranslation = {
             error: {
                 title: 'Error ekspor diagram',
                 description:
-                    'Sesuatu yang salah. Butuh bantuan? support@chartdb.io',
+                    'Sesuatu yang salah. Butuh bantuan? support@visualizedb.io',
             },
         },
 
@@ -482,7 +482,7 @@ export const id_ID: LanguageTranslation = {
             error: {
                 title: 'Error impor diagram',
                 description:
-                    'Diagram JSON tidak valid. Silakan cek JSON dan coba lagi. Butuh bantuan? support@chartdb.io',
+                    'Diagram JSON tidak valid. Silakan cek JSON dan coba lagi. Butuh bantuan? support@visualizedb.io',
             },
         },
         // TODO: Translate

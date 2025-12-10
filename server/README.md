@@ -1,6 +1,6 @@
-# ChartDB Backend Server
+# VisualizeDB Backend Server
 
-Express.js backend with SQLite database for ChartDB diagram persistence and version control.
+Express.js backend with SQLite database for VisualizeDB diagram persistence and version control.
 
 ## Features
 
@@ -34,7 +34,7 @@ NODE_ENV=development
 PORT=3001
 JWT_SECRET=your-secret-key-here-change-in-production
 REFRESH_TOKEN_SECRET=your-refresh-token-secret-here
-DATABASE_PATH=./database/chartdb.db
+DATABASE_PATH=./database/visualizedb.db
 CORS_ORIGIN=http://localhost:5173
 ```
 
@@ -169,7 +169,7 @@ NODE_ENV=production
 PORT=3001
 JWT_SECRET=<strong-random-secret>
 REFRESH_TOKEN_SECRET=<strong-random-secret>
-DATABASE_PATH=./database/chartdb.db
+DATABASE_PATH=./database/visualizedb.db
 CORS_ORIGIN=https://yourdomain.com
 ```
 
@@ -191,7 +191,7 @@ Use PM2 for production:
 
 ```bash
 npm install -g pm2
-pm2 start dist/index.js --name chartdb-server
+pm2 start dist/index.js --name visualizedb-server
 pm2 save
 pm2 startup
 ```
@@ -241,7 +241,7 @@ Make sure `CORS_ORIGIN` in `server/.env` matches your frontend URL.
 View the SQLite database:
 
 ```bash
-sqlite3 server/database/chartdb.db
+sqlite3 server/database/visualizedb.db
 .tables
 .schema diagrams
 SELECT * FROM users;
@@ -273,7 +273,7 @@ curl -X POST http://localhost:3001/api/auth/login \
 Delete the SQLite file to start fresh:
 
 ```bash
-rm server/database/chartdb.db
+rm server/database/visualizedb.db
 ```
 
 The database will be recreated on next server start.
@@ -303,4 +303,4 @@ Controlled by `VITE_USE_BACKEND` environment variable.
 
 ## License
 
-Same as ChartDB main project.
+Same as VisualizeDB main project.

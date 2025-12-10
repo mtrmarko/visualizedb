@@ -14,7 +14,7 @@ import type { Area } from '@/lib/domain/area';
 import type { DBCustomType } from '@/lib/domain/db-custom-type';
 import type { Note } from '@/lib/domain/note';
 
-export type ChartDBEventType =
+export type VisualizeDBEventType =
     | 'add_tables'
     | 'update_table'
     | 'remove_tables'
@@ -22,42 +22,42 @@ export type ChartDBEventType =
     | 'remove_field'
     | 'load_diagram';
 
-export type ChartDBEventBase<T extends ChartDBEventType, D> = {
+export type VisualizeDBEventBase<T extends VisualizeDBEventType, D> = {
     action: T;
     data: D;
 };
 
-export type CreateTableEvent = ChartDBEventBase<
+export type CreateTableEvent = VisualizeDBEventBase<
     'add_tables',
     { tables: DBTable[] }
 >;
 
-export type UpdateTableEvent = ChartDBEventBase<
+export type UpdateTableEvent = VisualizeDBEventBase<
     'update_table',
     { id: string; table: Partial<DBTable> }
 >;
 
-export type RemoveTableEvent = ChartDBEventBase<
+export type RemoveTableEvent = VisualizeDBEventBase<
     'remove_tables',
     { tableIds: string[] }
 >;
 
-export type AddFieldEvent = ChartDBEventBase<
+export type AddFieldEvent = VisualizeDBEventBase<
     'add_field',
     { tableId: string; field: DBField; fields: DBField[] }
 >;
 
-export type RemoveFieldEvent = ChartDBEventBase<
+export type RemoveFieldEvent = VisualizeDBEventBase<
     'remove_field',
     { tableId: string; fieldId: string; fields: DBField[] }
 >;
 
-export type LoadDiagramEvent = ChartDBEventBase<
+export type LoadDiagramEvent = VisualizeDBEventBase<
     'load_diagram',
     { diagram: Diagram }
 >;
 
-export type ChartDBEvent =
+export type VisualizeDBEvent =
     | CreateTableEvent
     | UpdateTableEvent
     | RemoveTableEvent
@@ -65,7 +65,7 @@ export type ChartDBEvent =
     | RemoveFieldEvent
     | LoadDiagramEvent;
 
-export interface ChartDBContext {
+export interface VisualizeDBContext {
     diagramId: string;
     diagramName: string;
     databaseType: DatabaseType;
@@ -77,7 +77,7 @@ export interface ChartDBContext {
     customTypes: DBCustomType[];
     notes: Note[];
     currentDiagram: Diagram;
-    events: EventEmitter<ChartDBEvent>;
+    events: EventEmitter<VisualizeDBEvent>;
     readonly?: boolean;
 
     highlightedCustomType?: DBCustomType;
@@ -310,7 +310,7 @@ export interface ChartDBContext {
     ) => Promise<void>;
 }
 
-export const chartDBContext = createContext<ChartDBContext>({
+export const visualizeDBContext = createContext<VisualizeDBContext>({
     databaseType: DatabaseType.GENERIC,
     diagramName: '',
     diagramId: '',

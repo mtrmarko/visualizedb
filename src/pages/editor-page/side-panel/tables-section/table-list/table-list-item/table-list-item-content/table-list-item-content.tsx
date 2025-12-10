@@ -10,7 +10,7 @@ import {
 import { Separator } from '@/components/separator/separator';
 import type { DBTable } from '@/lib/domain/db-table';
 import type { DBField } from '@/lib/domain/db-field';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import { TableField } from './table-field/table-field';
 import { TableIndex } from './table-index/table-index';
 import type { DBIndex } from '@/lib/domain/db-index';
@@ -50,7 +50,7 @@ export const TableListItemContent: React.FC<TableListItemContentProps> = ({
         updateTable,
         readonly,
         databaseType,
-    } = useChartDB();
+    } = useVisualizeDB();
     const { t } = useTranslation();
     const { color } = table;
     const [selectedItems, setSelectedItems] = React.useState<

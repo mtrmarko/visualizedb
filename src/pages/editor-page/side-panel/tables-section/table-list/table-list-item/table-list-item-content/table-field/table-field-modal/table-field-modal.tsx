@@ -31,7 +31,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/select/select';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 
 export interface TableFieldPopoverProps {
     field: DBField;
@@ -48,7 +48,7 @@ export const TableFieldPopover: React.FC<TableFieldPopoverProps> = ({
     updateField,
     removeField,
 }) => {
-    const { readonly } = useChartDB();
+    const { readonly } = useVisualizeDB();
     const { t } = useTranslation();
     const [localField, setLocalField] = React.useState<DBField>(field);
     const [isOpen, setIsOpen] = React.useState(false);

@@ -12,7 +12,7 @@ import {
     MenubarSubTrigger,
     MenubarTrigger,
 } from '@/components/menubar/menubar';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import { useDialog } from '@/hooks/use-dialog';
 import { useExportImage } from '@/hooks/use-export-image';
 import { databaseTypeToLabelMap } from '@/lib/databases';
@@ -37,7 +37,7 @@ export const Menu: React.FC<MenuProps> = () => {
         deleteDiagram,
         updateDiagramUpdatedAt,
         databaseType,
-    } = useChartDB();
+    } = useVisualizeDB();
     const {
         openCreateDiagramDialog,
         openOpenDiagramDialog,
@@ -100,8 +100,8 @@ export const Menu: React.FC<MenuProps> = () => {
         });
     }, [openExportImageDialog]);
 
-    const openChartDBDocs = useCallback(() => {
-        window.open('https://docs.chartdb.io', '_blank');
+    const openVisualizeDBDocs = useCallback(() => {
+        window.open('https://docs.visualizedb.io', '_blank');
     }, []);
 
     const openJoinDiscord = useCallback(() => {
@@ -521,7 +521,7 @@ export const Menu: React.FC<MenuProps> = () => {
             <MenubarMenu>
                 <MenubarTrigger>{t('menu.help.help')}</MenubarTrigger>
                 <MenubarContent>
-                    <MenubarItem onClick={openChartDBDocs}>
+                    <MenubarItem onClick={openVisualizeDBDocs}>
                         {t('menu.help.docs_website')}
                     </MenubarItem>
                     <MenubarItem onClick={openJoinDiscord}>

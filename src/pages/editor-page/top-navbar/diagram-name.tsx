@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/button/button';
 import { Check, Pencil } from 'lucide-react';
 import { Input } from '@/components/input/input';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import { useClickAway, useKeyPressEvent } from 'react-use';
 import { DiagramIcon } from '@/components/diagram-icon/diagram-icon';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +18,7 @@ import { useDialog } from '@/hooks/use-dialog';
 export interface DiagramNameProps {}
 
 export const DiagramName: React.FC<DiagramNameProps> = () => {
-    const { diagramName, updateDiagramName, currentDiagram } = useChartDB();
+    const { diagramName, updateDiagramName, currentDiagram } = useVisualizeDB();
 
     const { t } = useTranslation();
     const [editMode, setEditMode] = useState(false);

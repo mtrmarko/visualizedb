@@ -14,7 +14,7 @@ import type { NoteDiff } from './note-diff';
 import { createNoteDiffSchema } from './note-diff';
 import type { DBField, DBIndex, DBRelationship, DBTable, Area, Note } from '..';
 
-export type ChartDBDiff<
+export type VisualizeDBDiff<
     TTable = DBTable,
     TField = DBField,
     TIndex = DBIndex,
@@ -29,7 +29,7 @@ export type ChartDBDiff<
     | AreaDiff<TArea>
     | NoteDiff<TNote>;
 
-export const createChartDBDiffSchema = <
+export const createVisualizeDBDiffSchema = <
     TTable = DBTable,
     TField = DBField,
     TIndex = DBIndex,
@@ -44,7 +44,7 @@ export const createChartDBDiffSchema = <
     areaSchema: z.ZodType<TArea>,
     noteSchema: z.ZodType<TNote>
 ): z.ZodType<
-    ChartDBDiff<TTable, TField, TIndex, TRelationship, TArea, TNote>
+    VisualizeDBDiff<TTable, TField, TIndex, TRelationship, TArea, TNote>
 > => {
     return z.union([
         createTableDiffSchema(tableSchema),
@@ -54,7 +54,7 @@ export const createChartDBDiffSchema = <
         createAreaDiffSchema(areaSchema),
         createNoteDiffSchema(noteSchema),
     ]) as z.ZodType<
-        ChartDBDiff<TTable, TField, TIndex, TRelationship, TArea, TNote>
+        VisualizeDBDiff<TTable, TField, TIndex, TRelationship, TArea, TNote>
     >;
 };
 
@@ -67,7 +67,7 @@ export type DiffMap<
     TNote = Note,
 > = Map<
     string,
-    ChartDBDiff<TTable, TField, TIndex, TRelationship, TArea, TNote>
+    VisualizeDBDiff<TTable, TField, TIndex, TRelationship, TArea, TNote>
 >;
 
 export type DiffObject<
@@ -99,7 +99,7 @@ export type DiffKind<
     TArea = Area,
     TNote = Note,
 > = ExtractDiffKind<
-    ChartDBDiff<TTable, TField, TIndex, TRelationship, TArea, TNote>
+    VisualizeDBDiff<TTable, TField, TIndex, TRelationship, TArea, TNote>
 >;
 
 export const isDiffOfKind = <
@@ -110,7 +110,7 @@ export const isDiffOfKind = <
     TArea = Area,
     TNote = Note,
 >(
-    diff: ChartDBDiff<TTable, TField, TIndex, TRelationship, TArea, TNote>,
+    diff: VisualizeDBDiff<TTable, TField, TIndex, TRelationship, TArea, TNote>,
     kind: DiffKind<TTable, TField, TIndex, TRelationship, TArea, TNote>
 ): boolean => {
     if ('attribute' in kind) {

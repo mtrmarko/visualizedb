@@ -8,7 +8,7 @@ import type { DatabaseMetadata } from '@/lib/data/import-metadata/metadata-types
 import { loadDatabaseMetadata } from '@/lib/data/import-metadata/metadata-types/database-metadata';
 import type { Diagram } from '@/lib/domain/diagram';
 import { loadFromDatabaseMetadata } from '@/lib/data/import-metadata/import';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import { useRedoUndoStack } from '@/hooks/use-redo-undo-stack';
 import { Trans, useTranslation } from 'react-i18next';
 import { useReactFlow } from '@xyflow/react';
@@ -39,7 +39,7 @@ export const ImportDatabaseDialog: React.FC<ImportDatabaseDialogProps> = ({
         diagramName,
         databaseType: currentDatabaseType,
         updateDatabaseType,
-    } = useChartDB();
+    } = useVisualizeDB();
     const [scriptResult, setScriptResult] = useState('');
     const { resetRedoStack, resetUndoStack } = useRedoUndoStack();
     const { setNodes } = useReactFlow();

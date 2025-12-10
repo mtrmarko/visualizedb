@@ -5,7 +5,11 @@ import type { DBTable } from '@/lib/domain/db-table';
 import type { DBRelationship } from '@/lib/domain/db-relationship';
 import type { Area } from '@/lib/domain/area';
 import type { Note } from '@/lib/domain/note';
-import type { ChartDBDiff, DiffMap, DiffObject } from '@/lib/domain/diff/diff';
+import type {
+    VisualizeDBDiff,
+    DiffMap,
+    DiffObject,
+} from '@/lib/domain/diff/diff';
 import type {
     FieldDiff,
     FieldDiffAttribute,
@@ -102,7 +106,7 @@ export function generateDiff({
         matchers: options.matchers ?? {},
     };
 
-    const newDiffs = new Map<string, ChartDBDiff>();
+    const newDiffs = new Map<string, VisualizeDBDiff>();
     const changedTables = new Map<string, boolean>();
     const changedFields = new Map<string, boolean>();
     const changedAreas = new Map<string, boolean>();

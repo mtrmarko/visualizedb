@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
-import { useChartDB } from './use-chartdb';
+import { useVisualizeDB } from './use-visualizedb';
 import { useDebounce } from './use-debounce-v2';
 import type { DatabaseType, DBField, DBTable } from '@/lib/domain';
 import type {
@@ -79,9 +79,9 @@ export const useUpdateTableField = (
     const {
         databaseType,
         customTypes,
-        updateField: chartDBUpdateField,
-        removeField: chartDBRemoveField,
-    } = useChartDB();
+        updateField: visualizeDBUpdateField,
+        removeField: visualizeDBRemoveField,
+    } = useVisualizeDB();
 
     // Local state for responsive UI
     const [localFieldName, setLocalFieldName] = useState(field.name);
@@ -103,7 +103,7 @@ export const useUpdateTableField = (
         setLocalPrimaryKey(field.primaryKey);
     }, [field.nullable, field.primaryKey]);
 
-    // Use custom updateField if provided, otherwise use the chartDB one
+    // Use custom updateField if provided, otherwise use the visualizeDB one
     const updateField = useMemo(
         () =>
             customUpdateField
@@ -112,8 +112,8 @@ export const useUpdateTableField = (
                       _fieldId: string,
                       attrs: Partial<DBField>
                   ) => customUpdateField(attrs)
-                : chartDBUpdateField,
-        [customUpdateField, chartDBUpdateField]
+                : visualizeDBUpdateField,
+        [customUpdateField, visualizeDBUpdateField]
     );
 
     // Calculate primary key fields for validation
@@ -360,8 +360,8 @@ export const useUpdateTableField = (
     );
 
     const removeField = useCallback(() => {
-        chartDBRemoveField(table.id, field.id);
-    }, [chartDBRemoveField, table.id, field.id]);
+        visualizeDBRemoveField(table.id, field.id);
+    }, [visualizeDBRemoveField, table.id, field.id]);
 
     return {
         dataFieldOptions,

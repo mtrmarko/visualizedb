@@ -1,8 +1,8 @@
-# ChartDB Backend Implementation Guide
+# VisualizeDB Backend Implementation Guide
 
 ## Overview
 
-ChartDB now supports a **full-stack architecture** with an Express.js backend and SQLite database, providing:
+VisualizeDB now supports a **full-stack architecture** with an Express.js backend and SQLite database, providing:
 
 - ✅ **Multi-user authentication** (JWT-based)
 - ✅ **Cloud persistence** (SQLite database)
@@ -26,7 +26,7 @@ This starts:
 
 **2. Open browser to `http://localhost:5173`**
 
-**3. You'll see the signup page** - Create an account to start using ChartDB with backend persistence.
+**3. You'll see the signup page** - Create an account to start using VisualizeDB with backend persistence.
 
 ### Option 2: Use IndexedDB Only (Offline Mode)
 
@@ -120,7 +120,7 @@ npm run dev
 **Decision**: Use JSON columns for nested data (tables[], relationships[], etc.)
 
 **Rationale**:
-- ChartDB already serializes diagrams to JSON
+- VisualizeDB already serializes diagrams to JSON
 - Avoids 10+ normalized tables
 - Maintains consistency with existing data model
 - Simpler API (fetch full diagram in one request)
@@ -164,7 +164,7 @@ export const StorageProvider = ({ children }) => {
 ## File Structure
 
 ```
-chartdb/
+visualizedb/
 ├── server/                          # Backend (NEW)
 │   ├── src/
 │   │   ├── config/                 # Database, JWT, env
@@ -225,7 +225,7 @@ NODE_ENV=development
 PORT=3001
 JWT_SECRET=development-jwt-secret-key-change-in-production
 REFRESH_TOKEN_SECRET=development-refresh-secret-key
-DATABASE_PATH=./database/chartdb.db
+DATABASE_PATH=./database/visualizedb.db
 CORS_ORIGIN=http://localhost:5173
 ```
 
@@ -535,7 +535,7 @@ If you have existing diagrams in IndexedDB and want to migrate to the backend:
 
 ## Summary
 
-This implementation provides a complete, production-ready backend for ChartDB with:
+This implementation provides a complete, production-ready backend for VisualizeDB with:
 
 - **23 backend files** (20+ new files)
 - **15 frontend files** (10+ new files)

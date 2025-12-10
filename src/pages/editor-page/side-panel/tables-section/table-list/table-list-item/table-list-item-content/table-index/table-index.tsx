@@ -24,7 +24,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/tooltip/tooltip';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 
 export interface TableIndexProps {
     index: DBIndex;
@@ -45,7 +45,7 @@ export const TableIndex: React.FC<TableIndexProps> = ({
     removeIndex,
 }) => {
     const { t } = useTranslation();
-    const { databaseType, readonly } = useChartDB();
+    const { databaseType, readonly } = useVisualizeDB();
     const fieldOptions = fields.map((field) => ({
         label: field.name,
         value: field.id,

@@ -1,7 +1,7 @@
 {
-  "name": "chartdb-server",
+  "name": "visualizedb-server",
   "version": "1.0.0",
-  "description": "ChartDB Express.js backend server",
+  "description": "VisualizeDB Express.js backend server",
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon --watch src --exec tsx src/index.ts",
@@ -9,7 +9,7 @@
     "start": "node dist/index.js"
   },
   "keywords": [
-    "chartdb",
+    "visualizedb",
     "express",
     "sqlite"
   ],

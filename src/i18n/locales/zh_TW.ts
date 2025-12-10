@@ -463,7 +463,7 @@ export const zh_TW: LanguageTranslation = {
             error: {
                 title: 'Error exporting diagram',
                 description:
-                    'Something went wrong. Need help? support@chartdb.io',
+                    'Something went wrong. Need help? support@visualizedb.io',
             },
         },
 
@@ -475,7 +475,7 @@ export const zh_TW: LanguageTranslation = {
             error: {
                 title: '匯入圖表時發生錯誤',
                 description:
-                    '圖表的 JSON 無效。請檢查 JSON 並再試一次。如需幫助，請聯繫 support@chartdb.io',
+                    '圖表的 JSON 無效。請檢查 JSON 並再試一次。如需幫助，請聯繫 support@visualizedb.io',
             },
         },
         // TODO: Translate

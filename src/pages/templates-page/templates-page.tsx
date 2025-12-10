@@ -1,6 +1,6 @@
 import React from 'react';
-import ChartDBLogo from '@/assets/logo-light.png';
-import ChartDBDarkLogo from '@/assets/logo-dark.png';
+import VisualizeDBLogo from '@/assets/logo-light.png';
+import VisualizeDBDarkLogo from '@/assets/logo-dark.png';
 import { useTheme } from '@/hooks/use-theme';
 import { LocalConfigProvider } from '@/context/local-config-context/local-config-provider';
 import { ThemeProvider } from '@/context/theme-context/theme-provider';
@@ -42,17 +42,17 @@ const TemplatesPageComponent: React.FC = () => {
                     <div className="flex flex-1 justify-start gap-x-3">
                         <div className="flex items-center font-primary">
                             <a
-                                href="https://chartdb.io"
+                                href="https://visualizedb.io"
                                 className="cursor-pointer"
                                 rel="noreferrer"
                             >
                                 <img
                                     src={
                                         effectiveTheme === 'light'
-                                            ? ChartDBLogo
-                                            : ChartDBDarkLogo
+                                            ? VisualizeDBLogo
+                                            : VisualizeDBDarkLogo
                                     }
-                                    alt="chartDB"
+                                    alt="visualizeDB"
                                     className="h-4 max-w-fit"
                                 />
                             </a>
@@ -60,7 +60,7 @@ const TemplatesPageComponent: React.FC = () => {
                     </div>
                     <div className="flex flex-1 justify-end">
                         <iframe
-                            src={`https://ghbtns.com/github-btn.html?user=chartdb&repo=chartdb&type=star&size=large&text=false`}
+                            src={`https://ghbtns.com/github-btn.html?user=visualizedb&repo=visualizedb&type=star&size=large&text=false`}
                             width="40"
                             height="30"
                             title="GitHub"

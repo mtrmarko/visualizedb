@@ -10,7 +10,7 @@ initializeDatabase()
         server = app.listen(config.port, () => {
             console.log(`
 ╔════════════════════════════════════════════════════════════╗
-║                    ChartDB Server                          ║
+║                    VisualizeDB Server                          ║
 ╠════════════════════════════════════════════════════════════╣
 ║  Environment: ${String(config.nodeEnv).padEnd(42)} ║
 ║  Port:        ${String(config.port).padEnd(42)} ║
