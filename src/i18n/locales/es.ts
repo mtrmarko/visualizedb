@@ -455,14 +455,6 @@ export const es: LanguageTranslation = {
             cancel: 'Cancelar',
         },
 
-        star_us_dialog: {
-            title: '¡Ayúdanos a mejorar!',
-            description:
-                '¿Te gusta VisualizeDB? Por favor, danos una estrella en GitHub.',
-            close: 'Ahora no',
-            confirm: '¡Claro!',
-        },
-
         // TODO: Translate
         export_diagram_dialog: {
             title: 'Export Diagram',
