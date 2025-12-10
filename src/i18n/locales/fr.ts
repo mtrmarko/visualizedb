@@ -404,14 +404,6 @@ export const fr: LanguageTranslation = {
             confirm: 'Confirmer',
         },
 
-        star_us_dialog: {
-            title: 'Aidez-nous à nous améliorer',
-            description:
-                "Souhaitez-vous nous donner une étoile sur GitHub ? Il ne suffit que d'un clic !",
-            close: 'Pas maintenant',
-            confirm: 'Bien sûr !',
-        },
-
         update_table_schema_dialog: {
             title: 'Modifier le Schéma',
             description: 'Mettre à jour le schéma de la table "{{tableName}}"',

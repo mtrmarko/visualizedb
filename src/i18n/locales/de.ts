@@ -457,13 +457,6 @@ export const de: LanguageTranslation = {
             cancel: 'Abbrechen',
         },
 
-        star_us_dialog: {
-            title: 'Hilf uns, uns zu verbessern!',
-            description:
-                'Gefällt Ihnen VisualizeDB? Lassen Sie es uns wissen und helfen Sie uns, VisualizeDB zu verbessern!',
-            close: 'Nicht jetzt',
-            confirm: 'Natürlich!',
-        },
         // TODO: Translate
         export_diagram_dialog: {
             title: 'Export Diagram',

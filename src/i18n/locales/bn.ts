@@ -454,14 +454,6 @@ export const bn: LanguageTranslation = {
             cancel: 'বাতিল করুন',
         },
 
-        star_us_dialog: {
-            title: 'আমাদের উন্নত করতে সাহায্য করুন!',
-            description:
-                'আপনি কি GitHub-এ আমাদের একটি স্টার দিতে পারবেন? এটি মাত্র এক ক্লিক দূরে!',
-            close: 'এখন নয়',
-            confirm: 'অবশ্যই!',
-        },
-
         export_diagram_dialog: {
             title: 'চিত্র রপ্তানি করুন',
             description: 'রপ্তানির জন্য ফরম্যাট নির্বাচন করুন:',

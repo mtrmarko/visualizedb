@@ -455,14 +455,6 @@ export const gu: LanguageTranslation = {
             cancel: 'રદ કરો',
         },
 
-        star_us_dialog: {
-            title: 'અમને સુધારવામાં મદદ કરો!',
-            description:
-                'શું તમે GitHub પર અમને સ્ટાર આપી શકો છો? તે માત્ર એક ક્લિક દૂર છે!',
-            close: 'હાલમાં નહીં',
-            confirm: 'ખરેખર!',
-        },
-
         export_diagram_dialog: {
             title: 'ડાયાગ્રામ નિકાસ કરો',
             description: 'નિકાસ માટે ફોર્મેટ પસંદ કરો:',
