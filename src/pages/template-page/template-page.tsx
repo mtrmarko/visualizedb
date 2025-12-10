@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
-import ChartDBLogo from '@/assets/logo-light.png';
-import ChartDBDarkLogo from '@/assets/logo-dark.png';
+import VisualizeDBLogo from '@/assets/logo-light.png';
+import VisualizeDBDarkLogo from '@/assets/logo-dark.png';
 import { useTheme } from '@/hooks/use-theme';
 import { LocalConfigProvider } from '@/context/local-config-context/local-config-provider';
 import { ThemeProvider } from '@/context/theme-context/theme-provider';
@@ -29,7 +29,7 @@ import {
 import { Badge } from '@/components/badge/badge';
 import { Canvas } from '../editor-page/canvas/canvas';
 import { ReactFlowProvider } from '@xyflow/react';
-import { ChartDBProvider } from '@/context/chartdb-context/chartdb-provider';
+import { VisualizeDBProvider } from '@/context/visualizedb-context/visualizedb-provider';
 import { Helmet } from 'react-helmet-async';
 import { APP_URL, HOST_URL } from '@/lib/env';
 import { Link } from '@/components/link/link';
@@ -66,14 +66,14 @@ const TemplatePageComponent: React.FC = () => {
             <Helmet>
                 {template ? (
                     <>
-                        {HOST_URL !== 'https://chartdb.io' ? (
+                        {HOST_URL !== 'https://visualizedb.io' ? (
                             <link
                                 rel="canonical"
-                                href={`https://chartdb.io/templates/${templateSlug}`}
+                                href={`https://visualizedb.io/templates/${templateSlug}`}
                             />
                         ) : null}
                         <title>
-                            {`Database schema diagram for - ${template.name} | ChartDB`}
+                            {`Database schema diagram for - ${template.name} | VisualizeDB`}
                         </title>
                         <meta
                             name="description"
@@ -81,7 +81,7 @@ const TemplatePageComponent: React.FC = () => {
                         />
                         <meta
                             property="og:title"
-                            content={`Database schema diagram for - ${template.name} | ChartDB`}
+                            content={`Database schema diagram for - ${template.name} | VisualizeDB`}
                         />
                         <meta
                             property="og:url"
@@ -96,10 +96,10 @@ const TemplatePageComponent: React.FC = () => {
                             content={`${HOST_URL}${template.image}`}
                         />
                         <meta property="og:type" content="website" />
-                        <meta property="og:site_name" content="ChartDB" />
+                        <meta property="og:site_name" content="VisualizeDB" />
                         <meta
                             name="twitter:title"
-                            content={`Database schema for - ${template.name} | ChartDB`}
+                            content={`Database schema for - ${template.name} | VisualizeDB`}
                         />
                         <meta
                             name="twitter:description"
@@ -113,11 +113,14 @@ const TemplatePageComponent: React.FC = () => {
                             name="twitter:card"
                             content="summary_large_image"
                         />
-                        <meta name="twitter:site" content="@ChartDB_io" />
-                        <meta name="twitter:creator" content="@ChartDB_io" />
+                        <meta name="twitter:site" content="@VisualizeDB_io" />
+                        <meta
+                            name="twitter:creator"
+                            content="@VisualizeDB_io"
+                        />
                     </>
                 ) : (
-                    <title>Database Schema Diagram | ChartDB</title>
+                    <title>Database Schema Diagram | VisualizeDB</title>
                 )}
             </Helmet>
 
@@ -126,17 +129,17 @@ const TemplatePageComponent: React.FC = () => {
                     <div className="flex flex-1 justify-start gap-x-3">
                         <div className="flex items-center font-primary">
                             <a
-                                href="https://chartdb.io"
+                                href="https://visualizedb.io"
                                 className="cursor-pointer"
                                 rel="noreferrer"
                             >
                                 <img
                                     src={
                                         effectiveTheme === 'light'
-                                            ? ChartDBLogo
-                                            : ChartDBDarkLogo
+                                            ? VisualizeDBLogo
+                                            : VisualizeDBDarkLogo
                                     }
-                                    alt="chartDB"
+                                    alt="visualizeDB"
                                     className="h-4 max-w-fit"
                                 />
                             </a>
@@ -144,7 +147,7 @@ const TemplatePageComponent: React.FC = () => {
                     </div>
                     <div className="flex flex-1 justify-end">
                         <iframe
-                            src={`https://ghbtns.com/github-btn.html?user=chartdb&repo=chartdb&type=star&size=large&text=false`}
+                            src={`https://ghbtns.com/github-btn.html?user=visualizedb&repo=visualizedb&type=star&size=large&text=false`}
                             width="40"
                             height="30"
                             title="GitHub"
@@ -257,7 +260,7 @@ const TemplatePageComponent: React.FC = () => {
 
                                             <Link
                                                 className="break-all text-sm text-muted-foreground"
-                                                href={`${template.url}?ref=chartdb`}
+                                                href={`${template.url}?ref=visualizedb`}
                                                 target="_blank"
                                             >
                                                 {template.url}
@@ -284,7 +287,7 @@ const TemplatePageComponent: React.FC = () => {
                             </div>
                             <div className="flex min-h-96 overflow-hidden rounded border md:flex-1 md:rounded-lg">
                                 <div className="size-full">
-                                    <ChartDBProvider
+                                    <VisualizeDBProvider
                                         diagram={template.diagram}
                                         readonly
                                     >
@@ -293,7 +296,7 @@ const TemplatePageComponent: React.FC = () => {
                                                 template.diagram.tables ?? []
                                             }
                                         />
-                                    </ChartDBProvider>
+                                    </VisualizeDBProvider>
                                 </div>
                             </div>
                         </div>

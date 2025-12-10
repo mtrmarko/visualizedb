@@ -35,7 +35,7 @@ import {
 } from '@/lib/domain/db-table';
 import { TableNodeField } from './table-node-field';
 import { useLayout } from '@/hooks/use-layout';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import type { RelationshipEdgeType } from '../relationship-edge/relationship-edge';
 import type { DBField } from '@/lib/domain/db-field';
 import { useTranslation } from 'react-i18next';
@@ -82,7 +82,7 @@ export const TableNode: React.FC<NodeProps<TableNodeType>> = React.memo(
             isRelationshipCreatingTarget,
         },
     }) => {
-        const { updateTable, relationships, readonly } = useChartDB();
+        const { updateTable, relationships, readonly } = useVisualizeDB();
         const edges = useStore((store) => store.edges) as EdgeType[];
         const {
             openTableFromSidebar,

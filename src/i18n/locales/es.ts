@@ -458,7 +458,7 @@ export const es: LanguageTranslation = {
         star_us_dialog: {
             title: '¡Ayúdanos a mejorar!',
             description:
-                '¿Te gusta ChartDB? Por favor, danos una estrella en GitHub.',
+                '¿Te gusta VisualizeDB? Por favor, danos una estrella en GitHub.',
             close: 'Ahora no',
             confirm: '¡Claro!',
         },
@@ -473,7 +473,7 @@ export const es: LanguageTranslation = {
             error: {
                 title: 'Error exporting diagram',
                 description:
-                    'Something went wrong. Need help? support@chartdb.io',
+                    'Something went wrong. Need help? support@visualizedb.io',
             },
         },
         // TODO: Translate
@@ -485,7 +485,7 @@ export const es: LanguageTranslation = {
             error: {
                 title: 'Error importing diagram',
                 description:
-                    'The diagram JSON is invalid. Please check the JSON and try again. Need help? support@chartdb.io',
+                    'The diagram JSON is invalid. Please check the JSON and try again. Need help? support@visualizedb.io',
             },
         },
         // TODO: Translate

@@ -16,16 +16,17 @@ import {
     spreadFilterTables,
 } from '@/lib/domain/diagram-filter/diagram-filter';
 import { useStorage } from '@/hooks/use-storage';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import { filterTable } from '@/lib/domain/diagram-filter/filter';
 import { databasesWithSchemas, schemaNameToSchemaId } from '@/lib/domain';
 import { defaultSchemas } from '@/lib/data/default-schemas';
-import type { ChartDBEvent } from '../chartdb-context/chartdb-context';
+import type { VisualizeDBEvent } from '../visualizedb-context/visualizedb-context';
 
 export const DiagramFilterProvider: React.FC<React.PropsWithChildren> = ({
     children,
 }) => {
-    const { diagramId, tables, schemas, databaseType, events } = useChartDB();
+    const { diagramId, tables, schemas, databaseType, events } =
+        useVisualizeDB();
     const { getDiagramFilter, updateDiagramFilter } = useStorage();
     const [filter, setFilter] = useState<DiagramFilter>({});
     const [loading, setLoading] = useState<boolean>(true);
@@ -540,7 +541,7 @@ export const DiagramFilterProvider: React.FC<React.PropsWithChildren> = ({
         );
 
     const eventConsumer = useCallback(
-        (event: ChartDBEvent) => {
+        (event: VisualizeDBEvent) => {
             if (!hasActiveFilter) {
                 return;
             }

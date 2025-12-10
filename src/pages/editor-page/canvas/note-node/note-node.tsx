@@ -2,7 +2,7 @@ import React, { useCallback, useState, useRef } from 'react';
 import { NodeResizer, type NodeProps, type Node } from '@xyflow/react';
 import { Pencil, Trash2 } from 'lucide-react';
 import type { Note } from '@/lib/domain/note';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import { useClickAway, useKeyPressEvent } from 'react-use';
 import { ColorPicker } from '@/components/color-picker/color-picker';
 import { Button } from '@/components/button/button';
@@ -28,7 +28,7 @@ export const NoteNode: React.FC<NoteNodeProps> = ({
     dragging,
 }) => {
     const { note } = data;
-    const { updateNote, removeNote, readonly } = useChartDB();
+    const { updateNote, removeNote, readonly } = useVisualizeDB();
     const [editMode, setEditMode] = useState(false);
     const [content, setContent] = useState(note.content);
     const textareaRef = useRef<HTMLTextAreaElement>(null);

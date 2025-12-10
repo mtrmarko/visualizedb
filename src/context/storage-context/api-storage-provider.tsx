@@ -8,7 +8,7 @@ import type { DBDependency } from '@/lib/domain/db-dependency';
 import type { Area } from '@/lib/domain/area';
 import type { DBCustomType } from '@/lib/domain/db-custom-type';
 import type { Note } from '@/lib/domain/note';
-import type { ChartDBConfig } from '@/lib/domain/config';
+import type { VisualizeDBConfig } from '@/lib/domain/config';
 import type { DiagramFilter } from '@/lib/domain/diagram-filter/diagram-filter';
 import { apiClient } from '@/services/api-client';
 
@@ -45,7 +45,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
     };
 
     // Config operations
-    const getConfig = async (): Promise<ChartDBConfig | undefined> => {
+    const getConfig = async (): Promise<VisualizeDBConfig | undefined> => {
         try {
             const response = await apiClient.get('/diagrams/config');
             return response.data.config;
@@ -56,7 +56,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
     };
 
     const updateConfig = async (
-        config: Partial<ChartDBConfig>
+        config: Partial<VisualizeDBConfig>
     ): Promise<void> => {
         await apiClient.put('/diagrams/config', { config });
     };

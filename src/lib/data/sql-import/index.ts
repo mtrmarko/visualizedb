@@ -6,7 +6,7 @@ import { fromPostgresDump } from './dialect-importers/postgresql/postgresql-dump
 import { fromSQLServer } from './dialect-importers/sqlserver/sqlserver';
 import { fromSQLite } from './dialect-importers/sqlite/sqlite';
 import type { SQLParserResult } from './common';
-import { convertToChartDBDiagram } from './common';
+import { convertToVisualizeDBDiagram } from './common';
 import { adjustTablePositions } from '@/lib/domain/db-table';
 import { fromMySQL, isMySQLFormat } from './dialect-importers/mysql/mysql';
 
@@ -214,7 +214,7 @@ export async function sqlImportToDiagram({
     }
 
     // Convert the parsed SQL to a diagram
-    const diagram = convertToChartDBDiagram(
+    const diagram = convertToVisualizeDBDiagram(
         parserResult,
         sourceDatabaseType,
         targetDatabaseType

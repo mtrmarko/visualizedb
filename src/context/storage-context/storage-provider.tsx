@@ -6,7 +6,7 @@ import type { Diagram } from '@/lib/domain/diagram';
 import type { DBTable } from '@/lib/domain/db-table';
 import type { DBRelationship } from '@/lib/domain/db-relationship';
 import { determineCardinalities } from '@/lib/domain/db-relationship';
-import type { ChartDBConfig } from '@/lib/domain/config';
+import type { VisualizeDBConfig } from '@/lib/domain/config';
 import type { DBDependency } from '@/lib/domain/db-dependency';
 import type { Area } from '@/lib/domain/area';
 import type { DBCustomType } from '@/lib/domain/db-custom-type';
@@ -17,7 +17,7 @@ export const StorageProvider: React.FC<React.PropsWithChildren> = ({
     children,
 }) => {
     const db = useMemo(() => {
-        const dexieDB = new Dexie('ChartDB') as Dexie & {
+        const dexieDB = new Dexie('VisualizeDB') as Dexie & {
             diagrams: EntityTable<
                 Diagram,
                 'id' // primary key "id" (for the typings only)
@@ -47,7 +47,7 @@ export const StorageProvider: React.FC<React.PropsWithChildren> = ({
                 'id' // primary key "id" (for the typings only)
             >;
             config: EntityTable<
-                ChartDBConfig & { id: number },
+                VisualizeDBConfig & { id: number },
                 'id' // primary key "id" (for the typings only)
             >;
             diagram_filters: EntityTable<
@@ -254,7 +254,7 @@ export const StorageProvider: React.FC<React.PropsWithChildren> = ({
     }, []);
 
     const getConfig: StorageContext['getConfig'] =
-        useCallback(async (): Promise<ChartDBConfig | undefined> => {
+        useCallback(async (): Promise<VisualizeDBConfig | undefined> => {
             return await db.config.get(1);
         }, [db]);
 

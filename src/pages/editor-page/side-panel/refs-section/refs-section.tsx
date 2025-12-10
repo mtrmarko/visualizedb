@@ -3,7 +3,7 @@ import { Button } from '@/components/button/button';
 import { ListCollapse, Workflow } from 'lucide-react';
 import { Input } from '@/components/input/input';
 import { RefsList } from './refs-list/refs-list';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import type { DBRelationship } from '@/lib/domain/db-relationship';
 import type { DBDependency } from '@/lib/domain/db-dependency';
 import { useLayout } from '@/hooks/use-layout';
@@ -37,7 +37,7 @@ export interface RefsSectionProps {}
 
 export const RefsSection: React.FC<RefsSectionProps> = () => {
     const { relationships, dependencies, databaseType, getTable, readonly } =
-        useChartDB();
+        useVisualizeDB();
     const { filter } = useDiagramFilter();
     const [filterText, setFilterText] = React.useState('');
     const { closeAllRefsInSidebar } = useLayout();

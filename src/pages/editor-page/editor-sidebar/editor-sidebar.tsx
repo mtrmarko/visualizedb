@@ -23,10 +23,10 @@ import { useLayout } from '@/hooks/use-layout';
 import { useTranslation } from 'react-i18next';
 import { DiscordLogoIcon, TwitterLogoIcon } from '@radix-ui/react-icons';
 import { useBreakpoint } from '@/hooks/use-breakpoint';
-import ChartDBLogo from '@/assets/logo-light.png';
-import ChartDBDarkLogo from '@/assets/logo-dark.png';
+import VisualizeDBLogo from '@/assets/logo-light.png';
+import VisualizeDBDarkLogo from '@/assets/logo-dark.png';
 import { useTheme } from '@/hooks/use-theme';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import { supportsCustomTypes } from '@/lib/domain/database-capabilities';
 import { useDialog } from '@/hooks/use-dialog';
 import { Separator } from '@/components/separator/separator';
@@ -51,7 +51,7 @@ export const EditorSidebar: React.FC<EditorSidebarProps> = () => {
     const { t } = useTranslation();
     const { isMd: isDesktop } = useBreakpoint('md');
     const { effectiveTheme } = useTheme();
-    const { databaseType } = useChartDB();
+    const { databaseType } = useVisualizeDB();
     const { openCreateDiagramDialog, openOpenDiagramDialog } = useDialog();
 
     const diagramItems: SidebarItem[] = useMemo(
@@ -161,7 +161,8 @@ export const EditorSidebar: React.FC<EditorSidebarProps> = () => {
             {
                 title: 'Docs',
                 icon: BookOpen,
-                onClick: () => window.open('https://docs.chartdb.io', '_blank'),
+                onClick: () =>
+                    window.open('https://docs.visualizedb.io', '_blank'),
                 active: false,
             },
         ],
@@ -178,17 +179,17 @@ export const EditorSidebar: React.FC<EditorSidebarProps> = () => {
             {!isDesktop ? (
                 <SidebarHeader>
                     <a
-                        href="https://chartdb.io"
+                        href="https://visualizedb.io"
                         className="cursor-pointer"
                         rel="noreferrer"
                     >
                         <img
                             src={
                                 effectiveTheme === 'light'
-                                    ? ChartDBLogo
-                                    : ChartDBDarkLogo
+                                    ? VisualizeDBLogo
+                                    : VisualizeDBDarkLogo
                             }
-                            alt="chartDB"
+                            alt="visualizeDB"
                             className="h-4 max-w-fit"
                         />
                     </a>

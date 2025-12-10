@@ -10,7 +10,7 @@ export const HelmetData: React.FC = () => (
         <meta property="og:type" content="website" />
         <meta
             property="og:title"
-            content="ChartDB - Database schema diagrams visualizer"
+            content="VisualizeDB - Database schema diagrams visualizer"
         />
         <meta
             property="og:description"
@@ -18,13 +18,13 @@ export const HelmetData: React.FC = () => (
         />
         <meta
             property="og:image"
-            content="https://app.chartdb.io/chartdb.png"
+            content="https://app.visualizedb.io/visualizedb.png"
         />
-        <meta property="og:url" content="https://app.chartdb.io" />
+        <meta property="og:url" content="https://app.visualizedb.io" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta
             name="twitter:title"
-            content="ChartDB - Database schema diagrams visualizer"
+            content="VisualizeDB - Database schema diagrams visualizer"
         />
         <meta
             name="twitter:description"
@@ -32,8 +32,8 @@ export const HelmetData: React.FC = () => (
         />
         <meta
             name="twitter:image"
-            content="https://github.com/chartdb/chartdb/raw/main/public/chartdb.png"
+            content="https://github.com/mtrmarko/visualizedb/raw/main/public/visualizedb.png"
         />
-        <title>ChartDB - Database schema diagrams visualizer</title>
+        <title>VisualizeDB - Database schema diagrams visualizer</title>
     </Helmet>
 );

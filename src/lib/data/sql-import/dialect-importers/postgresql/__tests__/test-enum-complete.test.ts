@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { fromPostgres } from '../postgresql';
-import { convertToChartDBDiagram } from '../../../common';
+import { convertToVisualizeDBDiagram } from '../../../common';
 import { DatabaseType } from '@/lib/domain/database-type';
 
 describe('Complete Enum Test with Fantasy Example', () => {
@@ -87,7 +87,7 @@ CREATE TABLE dragon_quests (
         }
 
         // Convert to diagram
-        const diagram = convertToChartDBDiagram(
+        const diagram = convertToVisualizeDBDiagram(
             result,
             DatabaseType.POSTGRESQL,
             DatabaseType.POSTGRESQL

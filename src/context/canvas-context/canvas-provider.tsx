@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import type { CanvasContext, CanvasEvent } from './canvas-context';
 import { canvasContext } from './canvas-context';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import { adjustTablePositions } from '@/lib/domain/db-table';
 import { useReactFlow } from '@xyflow/react';
 import { findOverlappingTables } from '@/pages/editor-page/canvas/canvas-utils';
@@ -34,7 +34,7 @@ export const CanvasProvider = ({ children }: CanvasProviderProps) => {
         databaseType,
         areas,
         diagramId,
-    } = useChartDB();
+    } = useVisualizeDB();
     const { filter, loading: filterLoading } = useDiagramFilter();
     const { fitView, screenToFlowPosition, setNodes } = useReactFlow();
     const [overlapGraph, setOverlapGraph] =

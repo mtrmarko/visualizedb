@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { NodeResizer } from '@xyflow/react';
 import type { Area } from '@/lib/domain/area';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import { Input } from '@/components/input/input';
 import { useClickAway, useKeyPressEvent } from 'react-use';
 import {
@@ -27,7 +27,7 @@ export type AreaNodeType = Node<
 
 export const AreaNode: React.FC<NodeProps<AreaNodeType>> = React.memo(
     ({ selected, dragging, data: { area } }) => {
-        const { updateArea, readonly } = useChartDB();
+        const { updateArea, readonly } = useVisualizeDB();
         const { t } = useTranslation();
         const [editMode, setEditMode] = useState(false);
         const [areaName, setAreaName] = useState(area.name);

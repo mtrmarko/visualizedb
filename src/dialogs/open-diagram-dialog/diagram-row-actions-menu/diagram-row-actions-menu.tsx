@@ -8,7 +8,7 @@ import {
 } from '@/components/dropdown-menu/dropdown-menu';
 import { Button } from '@/components/button/button';
 import { Ellipsis, Layers2, SquareArrowOutUpRight, Trash2 } from 'lucide-react';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import type { Diagram } from '@/lib/domain';
 import { useStorage } from '@/hooks/use-storage';
 import { cloneDiagram } from '@/lib/clone';
@@ -27,7 +27,7 @@ export const DiagramRowActionsMenu: React.FC<DiagramRowActionsMenuProps> = ({
     refetch,
     numberOfDiagrams,
 }) => {
-    const { diagramId } = useChartDB();
+    const { diagramId } = useVisualizeDB();
     const { deleteDiagram, addDiagram } = useStorage();
     const { t } = useTranslation();
 

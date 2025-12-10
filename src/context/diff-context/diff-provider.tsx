@@ -15,7 +15,7 @@ import { useEventEmitter } from 'ahooks';
 import type { DBField } from '@/lib/domain/db-field';
 import type { DataType } from '@/lib/data/data-types/data-types';
 import type { DBRelationship } from '@/lib/domain/db-relationship';
-import type { ChartDBDiff, DiffMap } from '@/lib/domain/diff/diff';
+import type { VisualizeDBDiff, DiffMap } from '@/lib/domain/diff/diff';
 
 export const DiffProvider: React.FC<React.PropsWithChildren> = ({
     children,
@@ -24,7 +24,7 @@ export const DiffProvider: React.FC<React.PropsWithChildren> = ({
     const [originalDiagram, setOriginalDiagram] =
         React.useState<Diagram | null>(null);
     const [diffMap, setDiffMap] = React.useState<DiffMap>(
-        new Map<string, ChartDBDiff>()
+        new Map<string, VisualizeDBDiff>()
     );
     const [tablesChanged, setTablesChanged] = React.useState<
         Map<string, boolean>
@@ -506,7 +506,7 @@ export const DiffProvider: React.FC<React.PropsWithChildren> = ({
     );
 
     const resetDiff = useCallback<DiffContext['resetDiff']>(() => {
-        setDiffMap(new Map<string, ChartDBDiff>());
+        setDiffMap(new Map<string, VisualizeDBDiff>());
         setTablesChanged(new Map<string, boolean>());
         setFieldsChanged(new Map<string, boolean>());
         setNewDiagram(null);

@@ -6,7 +6,7 @@ import React, {
     useRef,
 } from 'react';
 import { useDebounceFn } from 'ahooks';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import { useTheme } from '@/hooks/use-theme';
 import { CodeSnippet } from '@/components/code-snippet/code-snippet';
 import type { EffectiveTheme } from '@/context/theme-context/theme-context';
@@ -43,7 +43,7 @@ const getEditorTheme = (theme: EffectiveTheme) => {
 
 export const TableDBML: React.FC<TableDBMLProps> = () => {
     const { currentDiagram, updateDiagramData, databaseType, readonly } =
-        useChartDB();
+        useVisualizeDB();
     const { effectiveTheme } = useTheme();
     const { toast } = useToast();
     const [dbmlFormat, setDbmlFormat] = useState<'inline' | 'standard'>(
@@ -106,7 +106,7 @@ export const TableDBML: React.FC<TableDBMLProps> = () => {
     const lastDBMLChange = useRef(editedDbml);
     const { calculateDiff, originalDiagram, resetDiff, hasDiff, newDiagram } =
         useDiff();
-    const { loadDiagramFromData } = useChartDB();
+    const { loadDiagramFromData } = useVisualizeDB();
     const [errorMessage, setErrorMessage] = useState<string>();
     const [warningMessage, setWarningMessage] = useState<string>();
     const { t } = useTranslation();

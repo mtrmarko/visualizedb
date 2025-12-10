@@ -40,7 +40,7 @@ export const SignupPage: React.FC = () => {
             await signup(email, password);
             toast({
                 title: 'Account created!',
-                description: 'Welcome to ChartDB.',
+                description: 'Welcome to VisualizeDB.',
             });
         } catch (error) {
             const errorMessage =
@@ -62,7 +62,7 @@ export const SignupPage: React.FC = () => {
             <div className="w-full max-w-md space-y-8">
                 <div className="text-center">
                     <h1 className="text-3xl font-bold tracking-tight">
-                        ChartDB
+                        VisualizeDB
                     </h1>
                     <p className="mt-2 text-sm text-muted-foreground">
                         Create your account

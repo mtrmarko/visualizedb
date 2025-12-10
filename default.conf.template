@@ -14,7 +14,7 @@ server {
             OPENAI_API_KEY: \"$OPENAI_API_KEY\",
             OPENAI_API_ENDPOINT: \"$OPENAI_API_ENDPOINT\",
             LLM_MODEL_NAME: \"$LLM_MODEL_NAME\",
-            HIDE_CHARTDB_CLOUD: \"$HIDE_CHARTDB_CLOUD\",
+            HIDE_VISUALIZEDB_CLOUD: \"$HIDE_VISUALIZEDB_CLOUD\",
             DISABLE_ANALYTICS: \"$DISABLE_ANALYTICS\"
         };";
     }

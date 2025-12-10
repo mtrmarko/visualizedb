@@ -22,7 +22,7 @@ export const config = {
     database: {
         path:
             process.env.DATABASE_PATH ||
-            path.join(__dirname, '../../database/chartdb.db'),
+            path.join(__dirname, '../../database/visualizedb.db'),
     },
 
     cors: {

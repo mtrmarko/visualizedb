@@ -12,7 +12,7 @@ import {
 } from '@/components/dialog/dialog';
 import { Label } from '@/components/label/label';
 import { Spinner } from '@/components/spinner/spinner';
-import { useChartDB } from '@/hooks/use-chartdb';
+import { useVisualizeDB } from '@/hooks/use-visualizedb';
 import { useDialog } from '@/hooks/use-dialog';
 import {
     exportBaseSQL,
@@ -42,7 +42,7 @@ export const ExportSQLDialog: React.FC<ExportSQLDialogProps> = ({
     targetDatabaseType,
 }) => {
     const { closeExportSQLDialog } = useDialog();
-    const { currentDiagram } = useChartDB();
+    const { currentDiagram } = useVisualizeDB();
     const { filter } = useDiagramFilter();
     const { t } = useTranslation();
     const [script, setScript] = React.useState<string>();
@@ -174,7 +174,7 @@ export const ExportSQLDialog: React.FC<ExportSQLDialogProps> = ({
                             components={[
                                 <a
                                     key={0}
-                                    href="mailto:support@chartdb.io"
+                                    href="mailto:support@visualizedb.io"
                                     target="_blank"
                                     className="text-pink-600 hover:underline"
                                     rel="noreferrer"
@@ -188,7 +188,7 @@ export const ExportSQLDialog: React.FC<ExportSQLDialogProps> = ({
                             components={[
                                 <a
                                     key={0}
-                                    href="https://github.com/chartdb/chartdb"
+                                    href="https://github.com/visualizedb/visualizedb"
                                     target="_blank"
                                     rel="noreferrer"
                                     className="text-pink-600 hover:underline"
