@@ -5,10 +5,11 @@ import type { Server } from 'http';
 
 let server: Server | null = null;
 
-initializeDatabase()
-    .then(() => {
-        server = app.listen(config.port, () => {
-            console.log(`
+// Initialize database (now synchronous with better-sqlite3)
+initializeDatabase();
+
+server = app.listen(config.port, () => {
+    console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║                    VisualizeDB Server                          ║
 ╠════════════════════════════════════════════════════════════╣
@@ -17,12 +18,7 @@ initializeDatabase()
 ║  API URL:     http://localhost:${config.port}/api${' '.repeat(20)} ║
 ╚════════════════════════════════════════════════════════════╝
         `);
-        });
-    })
-    .catch((error) => {
-        console.error('Failed to initialize database:', error);
-        process.exit(1);
-    });
+});
 
 // Graceful shutdown
 const shutdown = (): void => {

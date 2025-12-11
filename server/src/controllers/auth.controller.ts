@@ -101,11 +101,11 @@ export const logout = (_req: Request, res: Response) => {
     res.json({ success: true });
 };
 
-export const refresh = (
+export const refresh = async (
     req: Request,
     res: Response,
     next: NextFunction
-): void => {
+): Promise<void> => {
     try {
         const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE];
 
@@ -117,7 +117,7 @@ export const refresh = (
         const payload = verifyRefreshToken(refreshToken);
 
         // Verify user still exists
-        const user = getUserById(payload.userId);
+        const user = await getUserById(payload.userId);
         if (!user) {
             res.status(401).json({ error: 'User not found' });
             return;
@@ -135,7 +135,11 @@ export const refresh = (
     }
 };
 
-export const me = (req: Request, res: Response, next: NextFunction): void => {
+export const me = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
         const userId = req.user?.userId;
 
@@ -144,7 +148,7 @@ export const me = (req: Request, res: Response, next: NextFunction): void => {
             return;
         }
 
-        const user = getUserById(userId);
+        const user = await getUserById(userId);
 
         if (!user) {
             res.status(404).json({ error: 'User not found' });

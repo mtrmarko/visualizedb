@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { db } from '../config/database';
+import { prisma } from '../config/database';
 import { AppError } from '../middleware/error-handler';
 
 export type EntityCollection =
@@ -11,12 +11,12 @@ export type EntityCollection =
     | 'notes';
 
 const collectionToColumn: Record<EntityCollection, string> = {
-    tables: 'tables_json',
-    relationships: 'relationships_json',
-    dependencies: 'dependencies_json',
-    areas: 'areas_json',
-    customTypes: 'custom_types_json',
-    notes: 'notes_json',
+    tables: 'tablesJson',
+    relationships: 'relationshipsJson',
+    dependencies: 'dependenciesJson',
+    areas: 'areasJson',
+    customTypes: 'customTypesJson',
+    notes: 'notesJson',
 };
 
 const parseEntities = (json: string | null | undefined): any[] => {
@@ -28,68 +28,88 @@ const parseEntities = (json: string | null | undefined): any[] => {
     }
 };
 
-const ensureDiagramOwnership = (diagramId: string, userId: string): void => {
-    const exists = db
-        .prepare('SELECT id FROM diagrams WHERE id = ? AND user_id = ?')
-        .get(diagramId, userId) as { id: string } | undefined;
+const ensureDiagramOwnership = async (
+    diagramId: string,
+    userId: string
+): Promise<void> => {
+    const exists = await prisma.diagram.findFirst({
+        where: {
+            id: diagramId,
+            userId,
+        },
+        select: { id: true },
+    });
 
     if (!exists) {
         throw new AppError(404, 'Diagram not found');
     }
 };
 
-const listDiagramEntities = (
+const listDiagramEntities = async (
     userId: string,
     diagramId: string,
     collection: EntityCollection
-): any[] => {
+): Promise<any[]> => {
     const column = collectionToColumn[collection];
-    const row = db
-        .prepare(`SELECT ${column} FROM diagrams WHERE id = ? AND user_id = ?`)
-        .get(diagramId, userId) as Record<string, string> | undefined;
+
+    const row = await prisma.diagram.findFirst({
+        where: {
+            id: diagramId,
+            userId,
+        },
+    });
 
     if (!row) {
         throw new AppError(404, 'Diagram not found');
     }
 
-    return parseEntities(row[column]);
+    const jsonValue = row[column as keyof typeof row];
+    return parseEntities(typeof jsonValue === 'string' ? jsonValue : null);
 };
 
-const saveDiagramEntities = (
+const saveDiagramEntities = async (
     userId: string,
     diagramId: string,
     collection: EntityCollection,
     entities: any[]
-): void => {
+): Promise<void> => {
     const column = collectionToColumn[collection];
     const now = Date.now();
-    const result = db
-        .prepare(
-            `
-            UPDATE diagrams
-            SET ${column} = ?, updated_at = ?
-            WHERE id = ? AND user_id = ?
-        `
-        )
-        .run(JSON.stringify(entities), now, diagramId, userId);
 
-    if (result.changes === 0) {
+    const data: any = {
+        [column]: JSON.stringify(entities),
+        updatedAt: now,
+    };
+
+    const result = await prisma.diagram.updateMany({
+        where: {
+            id: diagramId,
+            userId,
+        },
+        data,
+    });
+
+    if (result.count === 0) {
         throw new AppError(404, 'Diagram not found');
     }
 };
 
-const findEntityContainer = (
+const findEntityContainer = async (
     userId: string,
     entityId: string,
     collection: EntityCollection
-): { diagramId: string; entities: any[]; index: number } => {
+): Promise<{ diagramId: string; entities: any[]; index: number }> => {
     const column = collectionToColumn[collection];
-    const rows = db
-        .prepare(`SELECT id, ${column} FROM diagrams WHERE user_id = ?`)
-        .all(userId) as Array<Record<string, string>>;
+
+    const rows = await prisma.diagram.findMany({
+        where: { userId },
+    });
 
     for (const row of rows) {
-        const entities = parseEntities(row[column]);
+        const jsonValue = row[column as keyof typeof row];
+        const entities = parseEntities(
+            typeof jsonValue === 'string' ? jsonValue : null
+        );
         const index = entities.findIndex(
             (entity: any) => entity?.id === entityId
         );
@@ -101,21 +121,21 @@ const findEntityContainer = (
     throw new AppError(404, 'Entity not found');
 };
 
-export const listEntities = (
+export const listEntities = async (
     userId: string,
     diagramId: string,
     collection: EntityCollection
-): any[] => {
+): Promise<any[]> => {
     return listDiagramEntities(userId, diagramId, collection);
 };
 
-export const getEntity = (
+export const getEntity = async (
     userId: string,
     diagramId: string,
     collection: EntityCollection,
     entityId: string
-): any => {
-    const entities = listDiagramEntities(userId, diagramId, collection);
+): Promise<any> => {
+    const entities = await listDiagramEntities(userId, diagramId, collection);
     const entity = entities.find((item) => item?.id === entityId);
 
     if (!entity) {
@@ -125,28 +145,28 @@ export const getEntity = (
     return entity;
 };
 
-export const addEntity = (
+export const addEntity = async (
     userId: string,
     diagramId: string,
     collection: EntityCollection,
     entity: any
-): any => {
-    ensureDiagramOwnership(diagramId, userId);
-    const entities = listDiagramEntities(userId, diagramId, collection);
+): Promise<any> => {
+    await ensureDiagramOwnership(diagramId, userId);
+    const entities = await listDiagramEntities(userId, diagramId, collection);
     entities.push(entity);
-    saveDiagramEntities(userId, diagramId, collection, entities);
+    await saveDiagramEntities(userId, diagramId, collection, entities);
     return entity;
 };
 
-export const replaceEntity = (
+export const replaceEntity = async (
     userId: string,
     diagramId: string,
     collection: EntityCollection,
     entityId: string,
     entity: any
-): any => {
-    ensureDiagramOwnership(diagramId, userId);
-    const entities = listDiagramEntities(userId, diagramId, collection);
+): Promise<any> => {
+    await ensureDiagramOwnership(diagramId, userId);
+    const entities = await listDiagramEntities(userId, diagramId, collection);
     const index = entities.findIndex((item) => item?.id === entityId);
 
     if (index === -1) {
@@ -154,49 +174,49 @@ export const replaceEntity = (
     }
 
     entities[index] = entity;
-    saveDiagramEntities(userId, diagramId, collection, entities);
+    await saveDiagramEntities(userId, diagramId, collection, entities);
     return entity;
 };
 
-export const updateEntityById = (
+export const updateEntityById = async (
     userId: string,
     collection: EntityCollection,
     entityId: string,
     attributes: Record<string, any>
-): any => {
-    const { diagramId, entities, index } = findEntityContainer(
+): Promise<any> => {
+    const { diagramId, entities, index } = await findEntityContainer(
         userId,
         entityId,
         collection
     );
     const updatedEntity = { ...entities[index], ...attributes };
     entities[index] = updatedEntity;
-    saveDiagramEntities(userId, diagramId, collection, entities);
+    await saveDiagramEntities(userId, diagramId, collection, entities);
     return { diagramId, entity: updatedEntity };
 };
 
-export const deleteEntity = (
+export const deleteEntity = async (
     userId: string,
     diagramId: string,
     collection: EntityCollection,
     entityId: string
-): void => {
-    ensureDiagramOwnership(diagramId, userId);
-    const entities = listDiagramEntities(userId, diagramId, collection);
+): Promise<void> => {
+    await ensureDiagramOwnership(diagramId, userId);
+    const entities = await listDiagramEntities(userId, diagramId, collection);
     const filtered = entities.filter((item) => item?.id !== entityId);
 
     if (filtered.length === entities.length) {
         throw new AppError(404, 'Entity not found');
     }
 
-    saveDiagramEntities(userId, diagramId, collection, filtered);
+    await saveDiagramEntities(userId, diagramId, collection, filtered);
 };
 
-export const clearEntities = (
+export const clearEntities = async (
     userId: string,
     diagramId: string,
     collection: EntityCollection
-): void => {
-    ensureDiagramOwnership(diagramId, userId);
-    saveDiagramEntities(userId, diagramId, collection, []);
+): Promise<void> => {
+    await ensureDiagramOwnership(diagramId, userId);
+    await saveDiagramEntities(userId, diagramId, collection, []);
 };

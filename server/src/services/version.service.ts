@@ -1,28 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { nanoid } from 'nanoid';
-import { db } from '../config/database';
+import { prisma } from '../config/database';
 import { AppError } from '../middleware/error-handler';
 import { getDiagram, updateDiagram } from './diagram.service';
 import type { DiagramVersion } from '../shared/api-types';
 
-interface VersionRow {
-    id: string;
-    diagram_id: string;
-    user_id: string;
-    version_name: string;
-    description: string | null;
-    snapshot_json: string;
-    created_at: number;
-}
-
-export const createVersion = (
+export const createVersion = async (
     userId: string,
     diagramId: string,
     versionName: string,
     description?: string
-): DiagramVersion => {
+): Promise<DiagramVersion> => {
     // Fetch current diagram state with all nested data
-    const diagram = getDiagram(userId, diagramId, {
+    const diagram = await getDiagram(userId, diagramId, {
         includeTables: true,
         includeRelationships: true,
         includeDependencies: true,
@@ -40,97 +30,100 @@ export const createVersion = (
     const now = Date.now();
     const snapshotJson = JSON.stringify(diagram);
 
-    db.prepare(
-        `
-        INSERT INTO diagram_versions (
-            id, diagram_id, user_id, version_name, description, snapshot_json, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
-    `
-    ).run(
-        versionId,
-        diagramId,
-        userId,
-        versionName,
-        description || null,
-        snapshotJson,
-        now
-    );
+    const version = await prisma.diagramVersion.create({
+        data: {
+            id: versionId,
+            diagramId,
+            userId,
+            versionName,
+            description: description || null,
+            snapshotJson,
+            createdAt: now,
+        },
+    });
 
     return {
-        id: versionId,
-        diagramId,
-        userId,
-        versionName,
-        description,
-        createdAt: now,
+        id: version.id,
+        diagramId: version.diagramId,
+        userId: version.userId,
+        versionName: version.versionName,
+        description: version.description || undefined,
+        createdAt: version.createdAt,
     };
 };
 
-export const listVersions = (
+export const listVersions = async (
     userId: string,
     diagramId: string
-): DiagramVersion[] => {
-    const rows = db
-        .prepare(
-            `
-            SELECT id, diagram_id, user_id, version_name, description, created_at
-            FROM diagram_versions
-            WHERE diagram_id = ? AND user_id = ?
-            ORDER BY created_at DESC
-        `
-        )
-        .all(diagramId, userId) as Omit<VersionRow, 'snapshot_json'>[];
+): Promise<DiagramVersion[]> => {
+    const versions = await prisma.diagramVersion.findMany({
+        where: {
+            diagramId,
+            userId,
+        },
+        select: {
+            id: true,
+            diagramId: true,
+            userId: true,
+            versionName: true,
+            description: true,
+            createdAt: true,
+        },
+        orderBy: {
+            createdAt: 'desc',
+        },
+    });
 
-    return rows.map((row) => ({
-        id: row.id,
-        diagramId: row.diagram_id,
-        userId: row.user_id,
-        versionName: row.version_name,
-        description: row.description || undefined,
-        createdAt: row.created_at,
+    return versions.map((version) => ({
+        id: version.id,
+        diagramId: version.diagramId,
+        userId: version.userId,
+        versionName: version.versionName,
+        description: version.description || undefined,
+        createdAt: version.createdAt,
     }));
 };
 
-export const getVersion = (userId: string, versionId: string): any => {
-    const row = db
-        .prepare(
-            `
-            SELECT *
-            FROM diagram_versions
-            WHERE id = ? AND user_id = ?
-        `
-        )
-        .get(versionId, userId) as VersionRow | undefined;
+export const getVersion = async (
+    userId: string,
+    versionId: string
+): Promise<any> => {
+    const version = await prisma.diagramVersion.findFirst({
+        where: {
+            id: versionId,
+            userId,
+        },
+    });
 
-    if (!row) {
+    if (!version) {
         throw new AppError(404, 'Version not found');
     }
 
     return {
-        id: row.id,
-        diagramId: row.diagram_id,
-        userId: row.user_id,
-        versionName: row.version_name,
-        description: row.description || undefined,
-        snapshot: JSON.parse(row.snapshot_json),
-        createdAt: row.created_at,
+        id: version.id,
+        diagramId: version.diagramId,
+        userId: version.userId,
+        versionName: version.versionName,
+        description: version.description || undefined,
+        snapshot: JSON.parse(version.snapshotJson),
+        createdAt: version.createdAt,
     };
 };
 
-export const restoreVersion = (
+export const restoreVersion = async (
     userId: string,
     diagramId: string,
     versionId: string
-): any => {
+): Promise<any> => {
     // Fetch version snapshot
-    const version = getVersion(userId, versionId);
+    const version = await getVersion(userId, versionId);
 
     if (version.diagramId !== diagramId) {
         throw new AppError(400, 'Version does not belong to this diagram');
     }
 
     // Create auto-backup before restore
-    const currentDiagram = getDiagram(userId, diagramId, {
+    const currentDiagram = await getDiagram(userId, diagramId, {
         includeTables: true,
         includeRelationships: true,
         includeDependencies: true,
@@ -141,7 +134,7 @@ export const restoreVersion = (
 
     if (currentDiagram) {
         const backupName = `Auto-backup before restore to "${version.versionName}"`;
-        createVersion(
+        await createVersion(
             userId,
             diagramId,
             backupName,
@@ -151,7 +144,7 @@ export const restoreVersion = (
 
     // Restore diagram from snapshot
     const snapshot = version.snapshot;
-    updateDiagram(userId, diagramId, {
+    await updateDiagram(userId, diagramId, {
         name: snapshot.name,
         databaseType: snapshot.databaseType,
         databaseEdition: snapshot.databaseEdition,
@@ -174,12 +167,18 @@ export const restoreVersion = (
     });
 };
 
-export const deleteVersion = (userId: string, versionId: string): void => {
-    const result = db
-        .prepare('DELETE FROM diagram_versions WHERE id = ? AND user_id = ?')
-        .run(versionId, userId);
+export const deleteVersion = async (
+    userId: string,
+    versionId: string
+): Promise<void> => {
+    const result = await prisma.diagramVersion.deleteMany({
+        where: {
+            id: versionId,
+            userId,
+        },
+    });
 
-    if (result.changes === 0) {
+    if (result.count === 0) {
         throw new AppError(404, 'Version not found');
     }
 };

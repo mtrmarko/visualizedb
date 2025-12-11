@@ -5,3 +5,5 @@ database/*.db-shm
 database/*.db-wal
 .env
 *.log
+
+/src/generated/prisma

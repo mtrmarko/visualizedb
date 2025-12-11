@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { nanoid } from 'nanoid';
-import { db } from '../config/database';
+import { prisma } from '../config/database';
 import { AppError } from '../middleware/error-handler';
 
 interface Diagram {
@@ -18,22 +18,6 @@ interface Diagram {
     updatedAt: Date;
 }
 
-interface DiagramRow {
-    id: string;
-    user_id: string;
-    name: string;
-    database_type: string;
-    database_edition: string | null;
-    tables_json: string | null;
-    relationships_json: string | null;
-    dependencies_json: string | null;
-    areas_json: string | null;
-    custom_types_json: string | null;
-    notes_json: string | null;
-    created_at: number;
-    updated_at: number;
-}
-
 interface ListOptions {
     includeTables?: boolean;
     includeRelationships?: boolean;
@@ -43,165 +27,141 @@ interface ListOptions {
     includeNotes?: boolean;
 }
 
-const rowToDiagram = (row: DiagramRow, options?: ListOptions): Diagram => {
-    const diagram: Diagram = {
-        id: row.id,
-        name: row.name,
-        databaseType: row.database_type,
-        databaseEdition: row.database_edition || undefined,
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at),
-    };
-
-    if (options?.includeTables && row.tables_json) {
-        diagram.tables = JSON.parse(row.tables_json);
-    }
-    if (options?.includeRelationships && row.relationships_json) {
-        diagram.relationships = JSON.parse(row.relationships_json);
-    }
-    if (options?.includeDependencies && row.dependencies_json) {
-        diagram.dependencies = JSON.parse(row.dependencies_json);
-    }
-    if (options?.includeAreas && row.areas_json) {
-        diagram.areas = JSON.parse(row.areas_json);
-    }
-    if (options?.includeCustomTypes && row.custom_types_json) {
-        diagram.customTypes = JSON.parse(row.custom_types_json);
-    }
-    if (options?.includeNotes && row.notes_json) {
-        diagram.notes = JSON.parse(row.notes_json);
-    }
-
-    return diagram;
-};
-
-export const createDiagram = (
+export const createDiagram = async (
     userId: string,
     diagram: Partial<Diagram>
-): Diagram => {
+): Promise<Diagram> => {
     const id = diagram.id || nanoid();
     const now = Date.now();
 
-    db.prepare(
-        `
-        INSERT INTO diagrams (
-            id, user_id, name, database_type, database_edition,
-            tables_json, relationships_json, dependencies_json,
-            areas_json, custom_types_json, notes_json,
-            created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `
-    ).run(
-        id,
-        userId,
-        diagram.name || 'Untitled Diagram',
-        diagram.databaseType || 'generic',
-        diagram.databaseEdition || null,
-        JSON.stringify(diagram.tables || []),
-        JSON.stringify(diagram.relationships || []),
-        JSON.stringify(diagram.dependencies || []),
-        JSON.stringify(diagram.areas || []),
-        JSON.stringify(diagram.customTypes || []),
-        JSON.stringify(diagram.notes || []),
-        now,
-        now
-    );
+    const created = await prisma.diagram.create({
+        data: {
+            id,
+            userId,
+            name: diagram.name || 'Untitled Diagram',
+            databaseType: diagram.databaseType || 'generic',
+            databaseEdition: diagram.databaseEdition || null,
+            tablesJson: JSON.stringify(diagram.tables || []),
+            relationshipsJson: JSON.stringify(diagram.relationships || []),
+            dependenciesJson: JSON.stringify(diagram.dependencies || []),
+            areasJson: JSON.stringify(diagram.areas || []),
+            customTypesJson: JSON.stringify(diagram.customTypes || []),
+            notesJson: JSON.stringify(diagram.notes || []),
+            createdAt: now,
+            updatedAt: now,
+        },
+    });
 
     return {
-        id,
-        name: diagram.name || 'Untitled Diagram',
-        databaseType: diagram.databaseType || 'generic',
-        databaseEdition: diagram.databaseEdition,
+        id: created.id,
+        name: created.name,
+        databaseType: created.databaseType,
+        databaseEdition: created.databaseEdition || undefined,
         tables: diagram.tables,
         relationships: diagram.relationships,
         dependencies: diagram.dependencies,
         areas: diagram.areas,
         customTypes: diagram.customTypes,
         notes: diagram.notes,
-        createdAt: new Date(now),
-        updatedAt: new Date(now),
+        createdAt: new Date(created.createdAt),
+        updatedAt: new Date(created.updatedAt),
     };
 };
 
-export const listDiagrams = (
+export const listDiagrams = async (
     userId: string,
     options?: ListOptions
-): Diagram[] => {
-    const columns = [
-        'id',
-        'user_id',
-        'name',
-        'database_type',
-        'database_edition',
-        'created_at',
-        'updated_at',
-    ];
+): Promise<Diagram[]> => {
+    const diagrams = await prisma.diagram.findMany({
+        where: { userId },
+        orderBy: { updatedAt: 'desc' },
+    });
 
-    if (options?.includeTables) columns.push('tables_json');
-    if (options?.includeRelationships) columns.push('relationships_json');
-    if (options?.includeDependencies) columns.push('dependencies_json');
-    if (options?.includeAreas) columns.push('areas_json');
-    if (options?.includeCustomTypes) columns.push('custom_types_json');
-    if (options?.includeNotes) columns.push('notes_json');
+    return diagrams.map((row) => {
+        const diagram: Diagram = {
+            id: row.id,
+            name: row.name,
+            databaseType: row.databaseType,
+            databaseEdition: row.databaseEdition || undefined,
+            createdAt: new Date(row.createdAt),
+            updatedAt: new Date(row.updatedAt),
+        };
 
-    const rows = db
-        .prepare(
-            `
-            SELECT ${columns.join(', ')}
-            FROM diagrams
-            WHERE user_id = ?
-            ORDER BY updated_at DESC
-        `
-        )
-        .all(userId) as DiagramRow[];
+        if (options?.includeTables && row.tablesJson) {
+            diagram.tables = JSON.parse(row.tablesJson);
+        }
+        if (options?.includeRelationships && row.relationshipsJson) {
+            diagram.relationships = JSON.parse(row.relationshipsJson);
+        }
+        if (options?.includeDependencies && row.dependenciesJson) {
+            diagram.dependencies = JSON.parse(row.dependenciesJson);
+        }
+        if (options?.includeAreas && row.areasJson) {
+            diagram.areas = JSON.parse(row.areasJson);
+        }
+        if (options?.includeCustomTypes && row.customTypesJson) {
+            diagram.customTypes = JSON.parse(row.customTypesJson);
+        }
+        if (options?.includeNotes && row.notesJson) {
+            diagram.notes = JSON.parse(row.notesJson);
+        }
 
-    return rows.map((row) => rowToDiagram(row, options));
+        return diagram;
+    });
 };
 
-export const getDiagram = (
+export const getDiagram = async (
     userId: string,
     diagramId: string,
     options?: ListOptions
-): Diagram | undefined => {
-    const columns = [
-        'id',
-        'user_id',
-        'name',
-        'database_type',
-        'database_edition',
-        'created_at',
-        'updated_at',
-    ];
-
-    if (options?.includeTables) columns.push('tables_json');
-    if (options?.includeRelationships) columns.push('relationships_json');
-    if (options?.includeDependencies) columns.push('dependencies_json');
-    if (options?.includeAreas) columns.push('areas_json');
-    if (options?.includeCustomTypes) columns.push('custom_types_json');
-    if (options?.includeNotes) columns.push('notes_json');
-
-    const row = db
-        .prepare(
-            `
-            SELECT ${columns.join(', ')}
-            FROM diagrams
-            WHERE id = ? AND user_id = ?
-        `
-        )
-        .get(diagramId, userId) as DiagramRow | undefined;
+): Promise<Diagram | undefined> => {
+    const row = await prisma.diagram.findFirst({
+        where: {
+            id: diagramId,
+            userId,
+        },
+    });
 
     if (!row) {
         return undefined;
     }
 
-    return rowToDiagram(row, options);
+    const diagram: Diagram = {
+        id: row.id,
+        name: row.name,
+        databaseType: row.databaseType,
+        databaseEdition: row.databaseEdition || undefined,
+        createdAt: new Date(row.createdAt),
+        updatedAt: new Date(row.updatedAt),
+    };
+
+    if (options?.includeTables && row.tablesJson) {
+        diagram.tables = JSON.parse(row.tablesJson);
+    }
+    if (options?.includeRelationships && row.relationshipsJson) {
+        diagram.relationships = JSON.parse(row.relationshipsJson);
+    }
+    if (options?.includeDependencies && row.dependenciesJson) {
+        diagram.dependencies = JSON.parse(row.dependenciesJson);
+    }
+    if (options?.includeAreas && row.areasJson) {
+        diagram.areas = JSON.parse(row.areasJson);
+    }
+    if (options?.includeCustomTypes && row.customTypesJson) {
+        diagram.customTypes = JSON.parse(row.customTypesJson);
+    }
+    if (options?.includeNotes && row.notesJson) {
+        diagram.notes = JSON.parse(row.notesJson);
+    }
+
+    return diagram;
 };
 
-export const updateDiagram = (
+export const updateDiagram = async (
     userId: string,
     diagramId: string,
     updates: Partial<Diagram>
-): void => {
+): Promise<void> => {
     console.log(
         'updateDiagram service - diagramId:',
         diagramId,
@@ -210,180 +170,204 @@ export const updateDiagram = (
     );
     console.log('updateDiagram service - update keys:', Object.keys(updates));
 
-    const setClauses: string[] = [];
-    const values: any[] = [];
+    const data: any = {};
 
     if (updates.name !== undefined) {
-        setClauses.push('name = ?');
-        values.push(updates.name);
+        data.name = updates.name;
     }
     if (updates.databaseType !== undefined) {
-        setClauses.push('database_type = ?');
-        values.push(updates.databaseType);
+        data.databaseType = updates.databaseType;
     }
     if (updates.databaseEdition !== undefined) {
-        setClauses.push('database_edition = ?');
-        values.push(updates.databaseEdition);
+        data.databaseEdition = updates.databaseEdition;
     }
     if (updates.tables !== undefined) {
-        setClauses.push('tables_json = ?');
-        values.push(JSON.stringify(updates.tables));
+        data.tablesJson = JSON.stringify(updates.tables);
         console.log(
             'updateDiagram service - updating tables, count:',
             updates.tables.length
         );
     }
     if (updates.relationships !== undefined) {
-        setClauses.push('relationships_json = ?');
-        values.push(JSON.stringify(updates.relationships));
+        data.relationshipsJson = JSON.stringify(updates.relationships);
     }
     if (updates.dependencies !== undefined) {
-        setClauses.push('dependencies_json = ?');
-        values.push(JSON.stringify(updates.dependencies));
+        data.dependenciesJson = JSON.stringify(updates.dependencies);
     }
     if (updates.areas !== undefined) {
-        setClauses.push('areas_json = ?');
-        values.push(JSON.stringify(updates.areas));
+        data.areasJson = JSON.stringify(updates.areas);
     }
     if (updates.customTypes !== undefined) {
-        setClauses.push('custom_types_json = ?');
-        values.push(JSON.stringify(updates.customTypes));
+        data.customTypesJson = JSON.stringify(updates.customTypes);
     }
     if (updates.notes !== undefined) {
-        setClauses.push('notes_json = ?');
-        values.push(JSON.stringify(updates.notes));
+        data.notesJson = JSON.stringify(updates.notes);
     }
 
-    if (setClauses.length === 0) {
+    if (Object.keys(data).length === 0) {
         console.log('updateDiagram service - no changes to apply');
         return;
     }
 
-    setClauses.push('updated_at = ?');
-    values.push(Date.now());
-
-    values.push(diagramId, userId);
+    data.updatedAt = Date.now();
 
     console.log(
-        'updateDiagram service - SQL:',
-        `UPDATE diagrams SET ${setClauses.join(', ')} WHERE id = ? AND user_id = ?`
+        'updateDiagram service - updating with data:',
+        Object.keys(data)
     );
 
-    const result = db
-        .prepare(
-            `
-        UPDATE diagrams
-        SET ${setClauses.join(', ')}
-        WHERE id = ? AND user_id = ?
-    `
-        )
-        .run(...values);
+    try {
+        const result = await prisma.diagram.updateMany({
+            where: {
+                id: diagramId,
+                userId,
+            },
+            data,
+        });
 
-    console.log('updateDiagram service - result.changes:', result.changes);
+        console.log('updateDiagram service - result.count:', result.count);
 
-    if (result.changes === 0) {
-        throw new AppError(404, 'Diagram not found');
+        if (result.count === 0) {
+            throw new AppError(404, 'Diagram not found');
+        }
+    } catch (error) {
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw error;
     }
 };
 
-export const deleteDiagram = (userId: string, diagramId: string): void => {
-    const result = db
-        .prepare('DELETE FROM diagrams WHERE id = ? AND user_id = ?')
-        .run(diagramId, userId);
+export const deleteDiagram = async (
+    userId: string,
+    diagramId: string
+): Promise<void> => {
+    const result = await prisma.diagram.deleteMany({
+        where: {
+            id: diagramId,
+            userId,
+        },
+    });
 
-    if (result.changes === 0) {
+    if (result.count === 0) {
         throw new AppError(404, 'Diagram not found');
     }
 };
 
 // Config operations
-export const getUserConfig = (userId: string): any => {
-    const row = db
-        .prepare(
-            'SELECT default_diagram_id, config_json FROM user_config WHERE user_id = ?'
-        )
-        .get(userId) as
-        | { default_diagram_id: string | null; config_json: string | null }
-        | undefined;
+export const getUserConfig = async (userId: string): Promise<any> => {
+    const config = await prisma.userConfig.findUnique({
+        where: { userId },
+        select: {
+            defaultDiagramId: true,
+            configJson: true,
+        },
+    });
 
-    if (!row) {
+    if (!config) {
         return null;
     }
 
     return {
-        defaultDiagramId: row.default_diagram_id,
-        ...(row.config_json ? JSON.parse(row.config_json) : {}),
+        defaultDiagramId: config.defaultDiagramId,
+        ...(config.configJson ? JSON.parse(config.configJson) : {}),
     };
 };
 
-export const updateUserConfig = (userId: string, config: any): void => {
+export const updateUserConfig = async (
+    userId: string,
+    config: any
+): Promise<void> => {
     const { defaultDiagramId, ...otherConfig } = config;
 
-    db.prepare(
-        `
-        INSERT INTO user_config (user_id, default_diagram_id, config_json)
-        VALUES (?, ?, ?)
-        ON CONFLICT(user_id) DO UPDATE SET
-            default_diagram_id = excluded.default_diagram_id,
-            config_json = excluded.config_json
-    `
-    ).run(userId, defaultDiagramId || null, JSON.stringify(otherConfig));
+    await prisma.userConfig.upsert({
+        where: { userId },
+        create: {
+            userId,
+            defaultDiagramId: defaultDiagramId || null,
+            configJson: JSON.stringify(otherConfig),
+        },
+        update: {
+            defaultDiagramId: defaultDiagramId || null,
+            configJson: JSON.stringify(otherConfig),
+        },
+    });
 };
 
 // Filter operations
-export const getDiagramFilter = (userId: string, diagramId: string): any => {
-    const row = db
-        .prepare(
-            'SELECT table_ids_json, schema_ids_json FROM diagram_filters WHERE diagram_id = ? AND user_id = ?'
-        )
-        .get(diagramId, userId) as
-        | { table_ids_json: string | null; schema_ids_json: string | null }
-        | undefined;
+export const getDiagramFilter = async (
+    userId: string,
+    diagramId: string
+): Promise<any> => {
+    const filter = await prisma.diagramFilter.findFirst({
+        where: {
+            diagramId,
+            userId,
+        },
+        select: {
+            tableIdsJson: true,
+            schemaIdsJson: true,
+        },
+    });
 
-    if (!row) {
+    if (!filter) {
         return null;
     }
 
     // Return undefined for null columns instead of empty arrays
     // undefined = no restriction, [] = restrict to nothing (hide all)
     return {
-        tableIds: row.table_ids_json
-            ? JSON.parse(row.table_ids_json)
+        tableIds: filter.tableIdsJson
+            ? JSON.parse(filter.tableIdsJson)
             : undefined,
-        schemaIds: row.schema_ids_json
-            ? JSON.parse(row.schema_ids_json)
+        schemaIds: filter.schemaIdsJson
+            ? JSON.parse(filter.schemaIdsJson)
             : undefined,
     };
 };
 
-export const updateDiagramFilter = (
+export const updateDiagramFilter = async (
     userId: string,
     diagramId: string,
     filter: any
-): void => {
-    db.prepare(
-        `
-        INSERT INTO diagram_filters (diagram_id, user_id, table_ids_json, schema_ids_json)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(diagram_id) DO UPDATE SET
-            table_ids_json = excluded.table_ids_json,
-            schema_ids_json = excluded.schema_ids_json
-    `
-    ).run(
-        diagramId,
-        userId,
-        // Store null for undefined, not empty array
-        // undefined/null = no restriction, [] = restrict to nothing
-        filter.tableIds !== undefined ? JSON.stringify(filter.tableIds) : null,
-        filter.schemaIds !== undefined ? JSON.stringify(filter.schemaIds) : null
-    );
+): Promise<void> => {
+    await prisma.diagramFilter.upsert({
+        where: { diagramId },
+        create: {
+            diagramId,
+            userId,
+            // Store null for undefined, not empty array
+            // undefined/null = no restriction, [] = restrict to nothing
+            tableIdsJson:
+                filter.tableIds !== undefined
+                    ? JSON.stringify(filter.tableIds)
+                    : null,
+            schemaIdsJson:
+                filter.schemaIds !== undefined
+                    ? JSON.stringify(filter.schemaIds)
+                    : null,
+        },
+        update: {
+            tableIdsJson:
+                filter.tableIds !== undefined
+                    ? JSON.stringify(filter.tableIds)
+                    : null,
+            schemaIdsJson:
+                filter.schemaIds !== undefined
+                    ? JSON.stringify(filter.schemaIds)
+                    : null,
+        },
+    });
 };
 
-export const deleteDiagramFilter = (
+export const deleteDiagramFilter = async (
     userId: string,
     diagramId: string
-): void => {
-    db.prepare(
-        'DELETE FROM diagram_filters WHERE diagram_id = ? AND user_id = ?'
-    ).run(diagramId, userId);
+): Promise<void> => {
+    await prisma.diagramFilter.deleteMany({
+        where: {
+            diagramId,
+            userId,
+        },
+    });
 };
