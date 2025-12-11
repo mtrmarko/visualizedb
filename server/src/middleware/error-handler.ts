@@ -16,7 +16,7 @@ export class AppError extends Error {
 
 export const errorHandler = (
     err: Error | AppError,
-    req: Request,
+    _req: Request,
     res: Response,
     _next: NextFunction // eslint-disable-line @typescript-eslint/no-unused-vars
 ) => {
@@ -37,6 +37,6 @@ export const errorHandler = (
     });
 };
 
-export const notFoundHandler = (req: Request, res: Response) => {
+export const notFoundHandler = (_req: Request, res: Response) => {
     res.status(404).json({ error: 'Route not found' });
 };

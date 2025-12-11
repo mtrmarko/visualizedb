@@ -96,17 +96,22 @@ export const login = async (
     }
 };
 
-export const logout = (req: Request, res: Response) => {
+export const logout = (_req: Request, res: Response) => {
     res.clearCookie(REFRESH_TOKEN_COOKIE);
     res.json({ success: true });
 };
 
-export const refresh = (req: Request, res: Response, next: NextFunction) => {
+export const refresh = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): void => {
     try {
         const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE];
 
         if (!refreshToken) {
-            return res.status(401).json({ error: 'No refresh token provided' });
+            res.status(401).json({ error: 'No refresh token provided' });
+            return;
         }
 
         const payload = verifyRefreshToken(refreshToken);
@@ -114,7 +119,8 @@ export const refresh = (req: Request, res: Response, next: NextFunction) => {
         // Verify user still exists
         const user = getUserById(payload.userId);
         if (!user) {
-            return res.status(401).json({ error: 'User not found' });
+            res.status(401).json({ error: 'User not found' });
+            return;
         }
 
         const accessToken = generateAccessToken({
@@ -129,18 +135,20 @@ export const refresh = (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export const me = (req: Request, res: Response, next: NextFunction) => {
+export const me = (req: Request, res: Response, next: NextFunction): void => {
     try {
         const userId = req.user?.userId;
 
         if (!userId) {
-            return res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
         }
 
         const user = getUserById(userId);
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            res.status(404).json({ error: 'User not found' });
+            return;
         }
 
         res.json({ user });

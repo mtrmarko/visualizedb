@@ -42,7 +42,7 @@ app.use('/api/diagrams', diagramRoutes);
 app.use('/api/diagrams', versionRoutes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: Date.now() });
 });
 
@@ -79,7 +79,7 @@ if (isProduction) {
     app.use(express.static(clientBuildPath));
 
     // SPA fallback - serve index.html for all non-API routes
-    app.get('*', (req, res) => {
+    app.get('*', (_req, res) => {
         res.sendFile(path.join(clientBuildPath, 'index.html'));
     });
 } else {

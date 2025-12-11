@@ -1,9 +1,9 @@
-import type { AnyZodObject } from 'zod';
+import type { ZodType } from 'zod';
 import type { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 
 export const validate =
-    (schema: AnyZodObject) =>
+    (schema: ZodType) =>
     (req: Request, res: Response, next: NextFunction): void => {
         const composite = {
             body: req.body,

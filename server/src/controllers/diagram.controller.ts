@@ -47,7 +47,7 @@ export const list = (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export const get = (req: Request, res: Response, next: NextFunction) => {
+export const get = (req: Request, res: Response, next: NextFunction): void => {
     try {
         const userId = req.user!.userId;
         const { id } = req.params;
@@ -65,7 +65,8 @@ export const get = (req: Request, res: Response, next: NextFunction) => {
         const diagram = getDiagram(userId, id, options);
 
         if (!diagram) {
-            return res.status(404).json({ error: 'Diagram not found' });
+            res.status(404).json({ error: 'Diagram not found' });
+            return;
         }
 
         res.json({ diagram });

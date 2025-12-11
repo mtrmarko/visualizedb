@@ -200,7 +200,9 @@ const paths: Record<string, unknown> = {
                     description: 'Config',
                     content: {
                         'application/json': {
-                            schema: z.object({ config: z.record(z.any()) }),
+                            schema: z.object({
+                                config: z.record(z.string(), z.any()),
+                            }),
                         },
                     },
                 },
@@ -211,7 +213,9 @@ const paths: Record<string, unknown> = {
             requestBody: {
                 content: {
                     'application/json': {
-                        schema: z.object({ config: z.record(z.any()) }),
+                        schema: z.object({
+                            config: z.record(z.string(), z.any()),
+                        }),
                     },
                 },
             },
@@ -434,27 +438,25 @@ Object.assign(
     entityPaths('note', 'notes', 'noteId', noteIdParam)
 );
 
-export const openApiDocument = createDocument(
-    {
-        openapi: '3.1.0',
-        info: {
-            title: 'VisualizeDB API',
-            version: '1.0.0',
-            description:
-                'Authentication, diagram persistence, nested entity CRUD, and versions for VisualizeDB.',
-        },
-        servers: [{ url: `http://localhost:${config.port}/api` }],
-        components: {
-            securitySchemes: {
-                bearerAuth: {
-                    type: 'http',
-                    scheme: 'bearer',
-                    bearerFormat: 'JWT',
-                },
+export const openApiDocument = createDocument({
+    openapi: '3.1.0',
+    info: {
+        title: 'VisualizeDB API',
+        version: '1.0.0',
+        description:
+            'Authentication, diagram persistence, nested entity CRUD, and versions for VisualizeDB.',
+    },
+    servers: [{ url: `http://localhost:${config.port}/api` }],
+    components: {
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT',
             },
         },
-        security: [{ bearerAuth: [] }],
-        paths,
     },
-    { targetOpenApiVersion: '3.1.0' }
-);
+    security: [{ bearerAuth: [] }],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    paths: paths as any,
+});
