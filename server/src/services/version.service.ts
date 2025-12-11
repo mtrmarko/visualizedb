@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { db } from '../config/database';
 import { AppError } from '../middleware/error-handler';
 import { getDiagram, updateDiagram } from './diagram.service';
-import type { DiagramVersion } from '../types/api.types';
+import type { DiagramVersion } from '../shared/api-types';
 
 interface VersionRow {
     id: string;

@@ -1,14 +1,12 @@
 import React from 'react';
 import { StorageProvider as DexieStorageProvider } from './storage-provider';
 import { ApiStorageProvider } from './api-storage-provider';
-
-const useBackend = import.meta.env.VITE_USE_BACKEND === 'true';
+import { backendEnabled } from '@/config/app-config';
 
 export const StorageProvider: React.FC<React.PropsWithChildren> = ({
     children,
 }) => {
-    console.log('useBackend:', useBackend);
-    if (useBackend) {
+    if (backendEnabled) {
         return <ApiStorageProvider>{children}</ApiStorageProvider>;
     }
 

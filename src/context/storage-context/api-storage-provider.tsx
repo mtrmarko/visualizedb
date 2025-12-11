@@ -167,33 +167,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
     }): Promise<void> => {
         // Queue this operation to prevent race conditions when adding multiple tables
         const operation = async () => {
-            const diagram = await getDiagram(diagramId, {
-                includeTables: true,
-            });
-            if (!diagram) throw new Error('Diagram not found');
-
-            console.log(
-                'addTable - fetched diagram with',
-                diagram.tables?.length || 0,
-                'tables, adding',
-                table.name,
-                'at position x:',
-                table.x,
-                'y:',
-                table.y
-            );
-            const tables = [...(diagram.tables || []), table];
-            console.log(
-                'addTable - saving with',
-                tables.length,
-                'tables, last table:',
-                tables[tables.length - 1]?.name,
-                'x:',
-                tables[tables.length - 1]?.x,
-                'y:',
-                tables[tables.length - 1]?.y
-            );
-            await updateDiagram({ id: diagramId, attributes: { tables } });
+            await apiClient.post(`/diagrams/${diagramId}/tables`, { table });
         };
 
         addTableQueue = addTableQueue.then(operation, operation);
@@ -207,8 +181,15 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<DBTable | undefined> => {
-        const diagram = await getDiagram(diagramId, { includeTables: true });
-        return diagram?.tables?.find((t) => t.id === id);
+        try {
+            const response = await apiClient.get(
+                `/diagrams/${diagramId}/tables/${id}`
+            );
+            return response.data.table;
+        } catch (error) {
+            console.error('Failed to get table:', error);
+            return undefined;
+        }
     };
 
     const updateTable = async ({
@@ -218,19 +199,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         id: string;
         attributes: Partial<DBTable>;
     }): Promise<void> => {
-        // We need to find which diagram this table belongs to
-        // This requires fetching all diagrams (not ideal, but necessary with current API)
-        const diagrams = await listDiagrams({ includeTables: true });
-        const diagram = diagrams.find((d) =>
-            d.tables?.some((t) => t.id === id)
-        );
-
-        if (!diagram) throw new Error('Table not found');
-
-        const tables = diagram.tables?.map((t) =>
-            t.id === id ? { ...t, ...attributes } : t
-        );
-        await updateDiagram({ id: diagram.id, attributes: { tables } });
+        await apiClient.put(`/diagrams/tables/${id}`, { attributes });
     };
 
     const putTable = async ({
@@ -240,13 +209,9 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         table: DBTable;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, { includeTables: true });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const tables = diagram.tables?.map((t) =>
-            t.id === table.id ? table : t
-        );
-        await updateDiagram({ id: diagramId, attributes: { tables } });
+        await apiClient.put(`/diagrams/${diagramId}/tables/${table.id}`, {
+            table,
+        });
     };
 
     const deleteTable = async ({
@@ -256,20 +221,16 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, { includeTables: true });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const tables = diagram.tables?.filter((t) => t.id !== id);
-        await updateDiagram({ id: diagramId, attributes: { tables } });
+        await apiClient.delete(`/diagrams/${diagramId}/tables/${id}`);
     };
 
     const listTables = async (diagramId: string): Promise<DBTable[]> => {
-        const diagram = await getDiagram(diagramId, { includeTables: true });
-        return diagram?.tables || [];
+        const response = await apiClient.get(`/diagrams/${diagramId}/tables`);
+        return response.data.tables || [];
     };
 
     const deleteDiagramTables = async (diagramId: string): Promise<void> => {
-        await updateDiagram({ id: diagramId, attributes: { tables: [] } });
+        await apiClient.delete(`/diagrams/${diagramId}/tables`);
     };
 
     // Relationship operations
@@ -280,13 +241,9 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         relationship: DBRelationship;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, {
-            includeRelationships: true,
+        await apiClient.post(`/diagrams/${diagramId}/relationships`, {
+            relationship,
         });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const relationships = [...(diagram.relationships || []), relationship];
-        await updateDiagram({ id: diagramId, attributes: { relationships } });
     };
 
     const getRelationship = async ({
@@ -296,10 +253,15 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<DBRelationship | undefined> => {
-        const diagram = await getDiagram(diagramId, {
-            includeRelationships: true,
-        });
-        return diagram?.relationships?.find((r) => r.id === id);
+        try {
+            const response = await apiClient.get(
+                `/diagrams/${diagramId}/relationships/${id}`
+            );
+            return response.data.relationship;
+        } catch (error) {
+            console.error('Failed to get relationship:', error);
+            return undefined;
+        }
     };
 
     const updateRelationship = async ({
@@ -309,17 +271,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         id: string;
         attributes: Partial<DBRelationship>;
     }): Promise<void> => {
-        const diagrams = await listDiagrams({ includeRelationships: true });
-        const diagram = diagrams.find((d) =>
-            d.relationships?.some((r) => r.id === id)
-        );
-
-        if (!diagram) throw new Error('Relationship not found');
-
-        const relationships = diagram.relationships?.map((r) =>
-            r.id === id ? { ...r, ...attributes } : r
-        );
-        await updateDiagram({ id: diagram.id, attributes: { relationships } });
+        await apiClient.put(`/diagrams/relationships/${id}`, { attributes });
     };
 
     const deleteRelationship = async ({
@@ -329,31 +281,22 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, {
-            includeRelationships: true,
-        });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const relationships = diagram.relationships?.filter((r) => r.id !== id);
-        await updateDiagram({ id: diagramId, attributes: { relationships } });
+        await apiClient.delete(`/diagrams/${diagramId}/relationships/${id}`);
     };
 
     const listRelationships = async (
         diagramId: string
     ): Promise<DBRelationship[]> => {
-        const diagram = await getDiagram(diagramId, {
-            includeRelationships: true,
-        });
-        return diagram?.relationships || [];
+        const response = await apiClient.get(
+            `/diagrams/${diagramId}/relationships`
+        );
+        return response.data.relationships || [];
     };
 
     const deleteDiagramRelationships = async (
         diagramId: string
     ): Promise<void> => {
-        await updateDiagram({
-            id: diagramId,
-            attributes: { relationships: [] },
-        });
+        await apiClient.delete(`/diagrams/${diagramId}/relationships`);
     };
 
     // Dependency operations
@@ -364,13 +307,9 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         dependency: DBDependency;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, {
-            includeDependencies: true,
+        await apiClient.post(`/diagrams/${diagramId}/dependencies`, {
+            dependency,
         });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const dependencies = [...(diagram.dependencies || []), dependency];
-        await updateDiagram({ id: diagramId, attributes: { dependencies } });
     };
 
     const getDependency = async ({
@@ -380,10 +319,15 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<DBDependency | undefined> => {
-        const diagram = await getDiagram(diagramId, {
-            includeDependencies: true,
-        });
-        return diagram?.dependencies?.find((d) => d.id === id);
+        try {
+            const response = await apiClient.get(
+                `/diagrams/${diagramId}/dependencies/${id}`
+            );
+            return response.data.dependency;
+        } catch (error) {
+            console.error('Failed to get dependency:', error);
+            return undefined;
+        }
     };
 
     const updateDependency = async ({
@@ -393,17 +337,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         id: string;
         attributes: Partial<DBDependency>;
     }): Promise<void> => {
-        const diagrams = await listDiagrams({ includeDependencies: true });
-        const diagram = diagrams.find((d) =>
-            d.dependencies?.some((dep) => dep.id === id)
-        );
-
-        if (!diagram) throw new Error('Dependency not found');
-
-        const dependencies = diagram.dependencies?.map((dep) =>
-            dep.id === id ? { ...dep, ...attributes } : dep
-        );
-        await updateDiagram({ id: diagram.id, attributes: { dependencies } });
+        await apiClient.put(`/diagrams/dependencies/${id}`, { attributes });
     };
 
     const deleteDependency = async ({
@@ -413,31 +347,22 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, {
-            includeDependencies: true,
-        });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const dependencies = diagram.dependencies?.filter((d) => d.id !== id);
-        await updateDiagram({ id: diagramId, attributes: { dependencies } });
+        await apiClient.delete(`/diagrams/${diagramId}/dependencies/${id}`);
     };
 
     const listDependencies = async (
         diagramId: string
     ): Promise<DBDependency[]> => {
-        const diagram = await getDiagram(diagramId, {
-            includeDependencies: true,
-        });
-        return diagram?.dependencies || [];
+        const response = await apiClient.get(
+            `/diagrams/${diagramId}/dependencies`
+        );
+        return response.data.dependencies || [];
     };
 
     const deleteDiagramDependencies = async (
         diagramId: string
     ): Promise<void> => {
-        await updateDiagram({
-            id: diagramId,
-            attributes: { dependencies: [] },
-        });
+        await apiClient.delete(`/diagrams/${diagramId}/dependencies`);
     };
 
     // Area operations
@@ -448,11 +373,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         area: Area;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, { includeAreas: true });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const areas = [...(diagram.areas || []), area];
-        await updateDiagram({ id: diagramId, attributes: { areas } });
+        await apiClient.post(`/diagrams/${diagramId}/areas`, { area });
     };
 
     const getArea = async ({
@@ -462,8 +383,15 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<Area | undefined> => {
-        const diagram = await getDiagram(diagramId, { includeAreas: true });
-        return diagram?.areas?.find((a) => a.id === id);
+        try {
+            const response = await apiClient.get(
+                `/diagrams/${diagramId}/areas/${id}`
+            );
+            return response.data.area;
+        } catch (error) {
+            console.error('Failed to get area:', error);
+            return undefined;
+        }
     };
 
     const updateArea = async ({
@@ -473,15 +401,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         id: string;
         attributes: Partial<Area>;
     }): Promise<void> => {
-        const diagrams = await listDiagrams({ includeAreas: true });
-        const diagram = diagrams.find((d) => d.areas?.some((a) => a.id === id));
-
-        if (!diagram) throw new Error('Area not found');
-
-        const areas = diagram.areas?.map((a) =>
-            a.id === id ? { ...a, ...attributes } : a
-        );
-        await updateDiagram({ id: diagram.id, attributes: { areas } });
+        await apiClient.put(`/diagrams/areas/${id}`, { attributes });
     };
 
     const deleteArea = async ({
@@ -491,20 +411,16 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, { includeAreas: true });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const areas = diagram.areas?.filter((a) => a.id !== id);
-        await updateDiagram({ id: diagramId, attributes: { areas } });
+        await apiClient.delete(`/diagrams/${diagramId}/areas/${id}`);
     };
 
     const listAreas = async (diagramId: string): Promise<Area[]> => {
-        const diagram = await getDiagram(diagramId, { includeAreas: true });
-        return diagram?.areas || [];
+        const response = await apiClient.get(`/diagrams/${diagramId}/areas`);
+        return response.data.areas || [];
     };
 
     const deleteDiagramAreas = async (diagramId: string): Promise<void> => {
-        await updateDiagram({ id: diagramId, attributes: { areas: [] } });
+        await apiClient.delete(`/diagrams/${diagramId}/areas`);
     };
 
     // Custom type operations
@@ -515,13 +431,9 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         customType: DBCustomType;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, {
-            includeCustomTypes: true,
+        await apiClient.post(`/diagrams/${diagramId}/custom-types`, {
+            customType,
         });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const customTypes = [...(diagram.customTypes || []), customType];
-        await updateDiagram({ id: diagramId, attributes: { customTypes } });
     };
 
     const getCustomType = async ({
@@ -531,10 +443,15 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<DBCustomType | undefined> => {
-        const diagram = await getDiagram(diagramId, {
-            includeCustomTypes: true,
-        });
-        return diagram?.customTypes?.find((ct) => ct.id === id);
+        try {
+            const response = await apiClient.get(
+                `/diagrams/${diagramId}/custom-types/${id}`
+            );
+            return response.data.customType;
+        } catch (error) {
+            console.error('Failed to get custom type:', error);
+            return undefined;
+        }
     };
 
     const updateCustomType = async ({
@@ -544,17 +461,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         id: string;
         attributes: Partial<DBCustomType>;
     }): Promise<void> => {
-        const diagrams = await listDiagrams({ includeCustomTypes: true });
-        const diagram = diagrams.find((d) =>
-            d.customTypes?.some((ct) => ct.id === id)
-        );
-
-        if (!diagram) throw new Error('Custom type not found');
-
-        const customTypes = diagram.customTypes?.map((ct) =>
-            ct.id === id ? { ...ct, ...attributes } : ct
-        );
-        await updateDiagram({ id: diagram.id, attributes: { customTypes } });
+        await apiClient.put(`/diagrams/custom-types/${id}`, { attributes });
     };
 
     const deleteCustomType = async ({
@@ -564,28 +471,22 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, {
-            includeCustomTypes: true,
-        });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const customTypes = diagram.customTypes?.filter((ct) => ct.id !== id);
-        await updateDiagram({ id: diagramId, attributes: { customTypes } });
+        await apiClient.delete(`/diagrams/${diagramId}/custom-types/${id}`);
     };
 
     const listCustomTypes = async (
         diagramId: string
     ): Promise<DBCustomType[]> => {
-        const diagram = await getDiagram(diagramId, {
-            includeCustomTypes: true,
-        });
-        return diagram?.customTypes || [];
+        const response = await apiClient.get(
+            `/diagrams/${diagramId}/custom-types`
+        );
+        return response.data.customTypes || [];
     };
 
     const deleteDiagramCustomTypes = async (
         diagramId: string
     ): Promise<void> => {
-        await updateDiagram({ id: diagramId, attributes: { customTypes: [] } });
+        await apiClient.delete(`/diagrams/${diagramId}/custom-types`);
     };
 
     // Note operations
@@ -596,11 +497,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         note: Note;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, { includeNotes: true });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const notes = [...(diagram.notes || []), note];
-        await updateDiagram({ id: diagramId, attributes: { notes } });
+        await apiClient.post(`/diagrams/${diagramId}/notes`, { note });
     };
 
     const getNote = async ({
@@ -610,8 +507,15 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<Note | undefined> => {
-        const diagram = await getDiagram(diagramId, { includeNotes: true });
-        return diagram?.notes?.find((n) => n.id === id);
+        try {
+            const response = await apiClient.get(
+                `/diagrams/${diagramId}/notes/${id}`
+            );
+            return response.data.note;
+        } catch (error) {
+            console.error('Failed to get note:', error);
+            return undefined;
+        }
     };
 
     const updateNote = async ({
@@ -621,15 +525,7 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         id: string;
         attributes: Partial<Note>;
     }): Promise<void> => {
-        const diagrams = await listDiagrams({ includeNotes: true });
-        const diagram = diagrams.find((d) => d.notes?.some((n) => n.id === id));
-
-        if (!diagram) throw new Error('Note not found');
-
-        const notes = diagram.notes?.map((n) =>
-            n.id === id ? { ...n, ...attributes } : n
-        );
-        await updateDiagram({ id: diagram.id, attributes: { notes } });
+        await apiClient.put(`/diagrams/notes/${id}`, { attributes });
     };
 
     const deleteNote = async ({
@@ -639,20 +535,16 @@ export const ApiStorageProvider: React.FC<ApiStorageProviderProps> = ({
         diagramId: string;
         id: string;
     }): Promise<void> => {
-        const diagram = await getDiagram(diagramId, { includeNotes: true });
-        if (!diagram) throw new Error('Diagram not found');
-
-        const notes = diagram.notes?.filter((n) => n.id !== id);
-        await updateDiagram({ id: diagramId, attributes: { notes } });
+        await apiClient.delete(`/diagrams/${diagramId}/notes/${id}`);
     };
 
     const listNotes = async (diagramId: string): Promise<Note[]> => {
-        const diagram = await getDiagram(diagramId, { includeNotes: true });
-        return diagram?.notes || [];
+        const response = await apiClient.get(`/diagrams/${diagramId}/notes`);
+        return response.data.notes || [];
     };
 
     const deleteDiagramNotes = async (diagramId: string): Promise<void> => {
-        await updateDiagram({ id: diagramId, attributes: { notes: [] } });
+        await apiClient.delete(`/diagrams/${diagramId}/notes`);
     };
 
     const value = {

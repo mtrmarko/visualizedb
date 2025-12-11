@@ -6,7 +6,7 @@ import {
     generateRefreshToken,
     verifyRefreshToken,
 } from '../config/auth';
-import type { AuthResponse } from '../types/api.types';
+import type { AuthResponse } from '../shared/api-types';
 
 const REFRESH_TOKEN_COOKIE = 'refreshToken';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days

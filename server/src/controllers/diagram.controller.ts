@@ -9,6 +9,7 @@ import {
     updateUserConfig,
     getDiagramFilter,
     updateDiagramFilter,
+    deleteDiagramFilter,
 } from '../services/diagram.service';
 
 export const create = (req: Request, res: Response, next: NextFunction) => {
@@ -170,6 +171,23 @@ export const putFilter = (req: Request, res: Response, next: NextFunction) => {
         updateDiagramFilter(userId, id, filter);
 
         res.json({ filter });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deleteFilter = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const userId = req.user!.userId;
+        const { id } = req.params;
+
+        deleteDiagramFilter(userId, id);
+
+        res.json({ success: true });
     } catch (error) {
         next(error);
     }

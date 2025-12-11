@@ -86,6 +86,20 @@ All require authentication.
 - `POST /diagrams` - Create diagram
 - `PUT /diagrams/:id` - Update diagram
 - `DELETE /diagrams/:id` - Delete diagram
+- Nested entity endpoints:
+  - `GET|POST|DELETE /diagrams/:id/tables` and `/diagrams/:id/tables/:tableId`
+  - `GET|POST|DELETE /diagrams/:id/relationships` and `/diagrams/:id/relationships/:relationshipId`
+  - `GET|POST|DELETE /diagrams/:id/dependencies` and `/diagrams/:id/dependencies/:dependencyId`
+  - `GET|POST|DELETE /diagrams/:id/areas` and `/diagrams/:id/areas/:areaId`
+  - `GET|POST|DELETE /diagrams/:id/custom-types` and `/diagrams/:id/custom-types/:customTypeId`
+  - `GET|POST|DELETE /diagrams/:id/notes` and `/diagrams/:id/notes/:noteId`
+- Entity updates by ID (no diagramId needed):
+  - `PUT /diagrams/tables/:tableId`
+  - `PUT /diagrams/relationships/:relationshipId`
+  - `PUT /diagrams/dependencies/:dependencyId`
+  - `PUT /diagrams/areas/:areaId`
+  - `PUT /diagrams/custom-types/:customTypeId`
+  - `PUT /diagrams/notes/:noteId`
 
 ### Versions (`/api/diagrams/:diagramId/versions`)
 

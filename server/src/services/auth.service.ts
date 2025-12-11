@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { nanoid } from 'nanoid';
 import { db } from '../config/database';
-import type { User } from '../types/api.types';
+import type { User } from '../shared/api-types';
 import { AppError } from '../middleware/error-handler';
 
 const SALT_ROUNDS = 10;

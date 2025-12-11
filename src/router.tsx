@@ -5,12 +5,15 @@ import type { TemplatePageLoaderData } from './pages/template-page/template-page
 import type { TemplatesPageLoaderData } from './pages/templates-page/templates-page';
 import { getTemplatesAndAllTags } from './templates-data/template-utils';
 import { ProtectedRoute } from './components/protected-route/protected-route';
-
-const useBackend = import.meta.env.VITE_USE_BACKEND === 'true';
+import { backendEnabled } from './config/app-config';
 
 // Helper to wrap element with ProtectedRoute if backend is enabled
 const protectRoute = (element: React.ReactElement) => {
-    return useBackend ? <ProtectedRoute>{element}</ProtectedRoute> : element;
+    return backendEnabled ? (
+        <ProtectedRoute>{element}</ProtectedRoute>
+    ) : (
+        element
+    );
 };
 
 const routes: RouteObject[] = [
@@ -25,7 +28,7 @@ const routes: RouteObject[] = [
         },
         children: [
             // Auth routes (only when backend is enabled)
-            ...(useBackend
+            ...(backendEnabled
                 ? [
                       {
                           path: 'login',

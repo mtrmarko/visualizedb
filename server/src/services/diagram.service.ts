@@ -378,3 +378,12 @@ export const updateDiagramFilter = (
         filter.schemaIds !== undefined ? JSON.stringify(filter.schemaIds) : null
     );
 };
+
+export const deleteDiagramFilter = (
+    userId: string,
+    diagramId: string
+): void => {
+    db.prepare(
+        'DELETE FROM diagram_filters WHERE diagram_id = ? AND user_id = ?'
+    ).run(diagramId, userId);
+};

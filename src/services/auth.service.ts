@@ -1,16 +1,6 @@
 import { apiClient, setAccessToken } from './api-client';
-
-export interface User {
-    id: string;
-    email: string;
-    createdAt: number;
-    updatedAt: number;
-}
-
-export interface AuthResponse {
-    user: User;
-    token: string;
-}
+import type { AuthResponse, User } from '@shared/api-types';
+export type { AuthResponse, User } from '@shared/api-types';
 
 export const authService = {
     async signup(email: string, password: string): Promise<AuthResponse> {
