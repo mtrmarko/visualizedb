@@ -5,8 +5,12 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon --watch src --exec tsx src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js"
+    "build": "prisma generate && tsc",
+    "start": "node dist/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:push": "prisma db push"
   },
   "keywords": [
     "visualizedb",
@@ -16,8 +20,13 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@libsql/client": "^0.15.15",
+    "@prisma/adapter-libsql": "^7.1.0",
+    "@prisma/client": "^7.1.0",
+    "@types/better-sqlite3": "^7.6.13",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.5.0",
     "compression": "^1.7.4",
     "concurrently": "^9.2.1",
     "cookie-parser": "^1.4.6",
@@ -27,7 +36,6 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "nanoid": "^5.1.6",
-    "sql.js": "^1.10.3",
     "zod": "^4.1.13",
     "zod-openapi": "^5.4.5"
   },
@@ -39,8 +47,8 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^25.0.0",
-    "@types/sql.js": "^1.4.9",
     "nodemon": "^3.0.2",
+    "prisma": "^7.1.0",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   }

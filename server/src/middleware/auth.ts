@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../config/auth';
-import { db } from '../config/database';
+import { prisma } from '../config/database';
 
 export const authenticate = (
     req: Request,
@@ -30,11 +30,11 @@ export const authenticate = (
     }
 };
 
-export const verifyDiagramOwnership = (
+export const verifyDiagramOwnership = async (
     req: Request,
     res: Response,
     next: NextFunction
-): void => {
+): Promise<void> => {
     try {
         const diagramId = req.params.id || req.params.diagramId;
         const userId = req.user?.userId;
@@ -53,9 +53,10 @@ export const verifyDiagramOwnership = (
             return;
         }
 
-        const diagram = db
-            .prepare('SELECT user_id FROM diagrams WHERE id = ?')
-            .get(diagramId) as { user_id: string } | undefined;
+        const diagram = await prisma.diagram.findUnique({
+            where: { id: diagramId },
+            select: { userId: true },
+        });
 
         console.log('verifyDiagramOwnership - diagram found:', !!diagram);
 
@@ -64,7 +65,7 @@ export const verifyDiagramOwnership = (
             return;
         }
 
-        if (diagram.user_id !== userId) {
+        if (diagram.userId !== userId) {
             res.status(403).json({ error: 'Access denied' });
             return;
         }

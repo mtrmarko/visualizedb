@@ -38,11 +38,11 @@ type EntityParam =
 
 const listHandler =
     (collection: EntityCollection) =>
-    (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.user!.userId;
             const diagramId = req.params.id;
-            const items = listEntities(userId, diagramId, collection);
+            const items = await listEntities(userId, diagramId, collection);
             res.json({ [pluralKeys[collection]]: items });
         } catch (error) {
             next(error);
@@ -51,12 +51,17 @@ const listHandler =
 
 const addHandler =
     (collection: EntityCollection, payloadKey: string) =>
-    (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.user!.userId;
             const diagramId = req.params.id;
             const entity = req.body[payloadKey];
-            const created = addEntity(userId, diagramId, collection, entity);
+            const created = await addEntity(
+                userId,
+                diagramId,
+                collection,
+                entity
+            );
             res.status(201).json({ [singularKeys[collection]]: created });
         } catch (error) {
             next(error);
@@ -65,12 +70,17 @@ const addHandler =
 
 const getByDiagramHandler =
     (collection: EntityCollection, entityParam: EntityParam) =>
-    (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.user!.userId;
             const diagramId = req.params.id;
             const entityId = req.params[entityParam];
-            const entity = getEntity(userId, diagramId, collection, entityId);
+            const entity = await getEntity(
+                userId,
+                diagramId,
+                collection,
+                entityId
+            );
             res.json({ [singularKeys[collection]]: entity });
         } catch (error) {
             next(error);
@@ -83,13 +93,13 @@ const replaceHandler =
         entityParam: EntityParam,
         payloadKey: string
     ) =>
-    (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.user!.userId;
             const diagramId = req.params.id;
             const entityId = req.params[entityParam];
             const entity = req.body[payloadKey];
-            const updated = replaceEntity(
+            const updated = await replaceEntity(
                 userId,
                 diagramId,
                 collection,
@@ -104,12 +114,12 @@ const replaceHandler =
 
 const updateByIdHandler =
     (collection: EntityCollection, entityParam: EntityParam) =>
-    (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.user!.userId;
             const entityId = req.params[entityParam];
             const { attributes } = req.body;
-            const { entity } = updateEntityById(
+            const { entity } = await updateEntityById(
                 userId,
                 collection,
                 entityId,
@@ -123,12 +133,12 @@ const updateByIdHandler =
 
 const deleteHandler =
     (collection: EntityCollection, entityParam: EntityParam) =>
-    (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.user!.userId;
             const diagramId = req.params.id;
             const entityId = req.params[entityParam];
-            deleteEntity(userId, diagramId, collection, entityId);
+            await deleteEntity(userId, diagramId, collection, entityId);
             res.json({ success: true });
         } catch (error) {
             next(error);
@@ -137,11 +147,11 @@ const deleteHandler =
 
 const clearHandler =
     (collection: EntityCollection) =>
-    (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.user!.userId;
             const diagramId = req.params.id;
-            clearEntities(userId, diagramId, collection);
+            await clearEntities(userId, diagramId, collection);
             res.json({ success: true });
         } catch (error) {
             next(error);

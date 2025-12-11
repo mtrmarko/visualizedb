@@ -12,12 +12,16 @@ import {
     deleteDiagramFilter,
 } from '../services/diagram.service';
 
-export const create = (req: Request, res: Response, next: NextFunction) => {
+export const create = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const userId = req.user!.userId;
         const { diagram } = req.body;
 
-        const newDiagram = createDiagram(userId, diagram);
+        const newDiagram = await createDiagram(userId, diagram);
 
         res.status(201).json({ diagram: newDiagram });
     } catch (error) {
@@ -25,7 +29,7 @@ export const create = (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export const list = (req: Request, res: Response, next: NextFunction) => {
+export const list = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user!.userId;
         const include = (req.query.include as string)?.split(',') || [];
@@ -39,7 +43,7 @@ export const list = (req: Request, res: Response, next: NextFunction) => {
             includeNotes: include.includes('notes'),
         };
 
-        const diagrams = listDiagrams(userId, options);
+        const diagrams = await listDiagrams(userId, options);
 
         res.json({ diagrams });
     } catch (error) {
@@ -47,7 +51,11 @@ export const list = (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export const get = (req: Request, res: Response, next: NextFunction): void => {
+export const get = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
         const userId = req.user!.userId;
         const { id } = req.params;
@@ -62,7 +70,7 @@ export const get = (req: Request, res: Response, next: NextFunction): void => {
             includeNotes: include.includes('notes'),
         };
 
-        const diagram = getDiagram(userId, id, options);
+        const diagram = await getDiagram(userId, id, options);
 
         if (!diagram) {
             res.status(404).json({ error: 'Diagram not found' });
@@ -75,7 +83,11 @@ export const get = (req: Request, res: Response, next: NextFunction): void => {
     }
 };
 
-export const update = (req: Request, res: Response, next: NextFunction) => {
+export const update = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const userId = req.user!.userId;
         const { id } = req.params;
@@ -87,7 +99,7 @@ export const update = (req: Request, res: Response, next: NextFunction) => {
             Object.keys(diagram || {})
         );
 
-        updateDiagram(userId, id, diagram);
+        await updateDiagram(userId, id, diagram);
 
         // Fetch updated diagram
         const fullOptions = {
@@ -98,7 +110,7 @@ export const update = (req: Request, res: Response, next: NextFunction) => {
             includeCustomTypes: true,
             includeNotes: true,
         };
-        const updatedDiagram = getDiagram(userId, id, fullOptions);
+        const updatedDiagram = await getDiagram(userId, id, fullOptions);
 
         console.log(
             'update controller - updated diagram found:',
@@ -112,72 +124,7 @@ export const update = (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export const remove = (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const userId = req.user!.userId;
-        const { id } = req.params;
-
-        deleteDiagram(userId, id);
-
-        res.json({ success: true });
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const getConfig = (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const userId = req.user!.userId;
-        const config = getUserConfig(userId);
-
-        res.json({ config: config || {} });
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const putConfig = (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const userId = req.user!.userId;
-        const { config } = req.body;
-
-        updateUserConfig(userId, config);
-
-        res.json({ config });
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const getFilter = (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const userId = req.user!.userId;
-        const { id } = req.params;
-
-        const filter = getDiagramFilter(userId, id);
-
-        // Return null if no filter exists, so frontend can apply default logic
-        res.json({ filter: filter || null });
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const putFilter = (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const userId = req.user!.userId;
-        const { id } = req.params;
-        const { filter } = req.body;
-
-        updateDiagramFilter(userId, id, filter);
-
-        res.json({ filter });
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const deleteFilter = (
+export const remove = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -186,7 +133,92 @@ export const deleteFilter = (
         const userId = req.user!.userId;
         const { id } = req.params;
 
-        deleteDiagramFilter(userId, id);
+        await deleteDiagram(userId, id);
+
+        res.json({ success: true });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getConfig = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const userId = req.user!.userId;
+        const config = await getUserConfig(userId);
+
+        res.json({ config: config || {} });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const putConfig = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const userId = req.user!.userId;
+        const { config } = req.body;
+
+        await updateUserConfig(userId, config);
+
+        res.json({ config });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getFilter = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const userId = req.user!.userId;
+        const { id } = req.params;
+
+        const filter = await getDiagramFilter(userId, id);
+
+        // Return null if no filter exists, so frontend can apply default logic
+        res.json({ filter: filter || null });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const putFilter = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const userId = req.user!.userId;
+        const { id } = req.params;
+        const { filter } = req.body;
+
+        await updateDiagramFilter(userId, id, filter);
+
+        res.json({ filter });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deleteFilter = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const userId = req.user!.userId;
+        const { id } = req.params;
+
+        await deleteDiagramFilter(userId, id);
 
         res.json({ success: true });
     } catch (error) {

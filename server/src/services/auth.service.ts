@@ -1,27 +1,19 @@
 import bcrypt from 'bcrypt';
 import { nanoid } from 'nanoid';
-import { db } from '../config/database';
+import { prisma } from '../config/database';
 import type { User } from '../shared/api-types';
 import { AppError } from '../middleware/error-handler';
 
 const SALT_ROUNDS = 10;
-
-interface UserRow {
-    id: string;
-    email: string;
-    password_hash: string;
-    created_at: number;
-    updated_at: number;
-}
 
 export const createUser = async (
     email: string,
     password: string
 ): Promise<User> => {
     // Check if user already exists
-    const existing = db
-        .prepare('SELECT id FROM users WHERE email = ?')
-        .get(email) as { id: string } | undefined;
+    const existing = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+    });
 
     if (existing) {
         throw new AppError(400, 'User with this email already exists');
@@ -34,18 +26,21 @@ export const createUser = async (
     const id = nanoid();
     const now = Date.now();
 
-    db.prepare(
-        `
-        INSERT INTO users (id, email, password_hash, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?)
-    `
-    ).run(id, email.toLowerCase(), passwordHash, now, now);
+    const user = await prisma.user.create({
+        data: {
+            id,
+            email: email.toLowerCase(),
+            passwordHash,
+            createdAt: now,
+            updatedAt: now,
+        },
+    });
 
     return {
-        id,
-        email: email.toLowerCase(),
-        createdAt: now,
-        updatedAt: now,
+        id: user.id,
+        email: user.email,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
     };
 };
 
@@ -53,15 +48,15 @@ export const verifyUser = async (
     email: string,
     password: string
 ): Promise<User> => {
-    const user = db
-        .prepare('SELECT * FROM users WHERE email = ?')
-        .get(email.toLowerCase()) as UserRow | undefined;
+    const user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+    });
 
     if (!user) {
         throw new AppError(401, 'Invalid email or password');
     }
 
-    const isValid = await bcrypt.compare(password, user.password_hash);
+    const isValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isValid) {
         throw new AppError(401, 'Invalid email or password');
@@ -70,17 +65,23 @@ export const verifyUser = async (
     return {
         id: user.id,
         email: user.email,
-        createdAt: user.created_at,
-        updatedAt: user.updated_at,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
     };
 };
 
-export const getUserById = (userId: string): User | undefined => {
-    const user = db
-        .prepare(
-            'SELECT id, email, created_at, updated_at FROM users WHERE id = ?'
-        )
-        .get(userId) as UserRow | undefined;
+export const getUserById = async (
+    userId: string
+): Promise<User | undefined> => {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+            id: true,
+            email: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
 
     if (!user) {
         return undefined;
@@ -89,17 +90,23 @@ export const getUserById = (userId: string): User | undefined => {
     return {
         id: user.id,
         email: user.email,
-        createdAt: user.created_at,
-        updatedAt: user.updated_at,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
     };
 };
 
-export const getUserByEmail = (email: string): User | undefined => {
-    const user = db
-        .prepare(
-            'SELECT id, email, created_at, updated_at FROM users WHERE email = ?'
-        )
-        .get(email.toLowerCase()) as UserRow | undefined;
+export const getUserByEmail = async (
+    email: string
+): Promise<User | undefined> => {
+    const user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+        select: {
+            id: true,
+            email: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
 
     if (!user) {
         return undefined;
@@ -108,7 +115,7 @@ export const getUserByEmail = (email: string): User | undefined => {
     return {
         id: user.id,
         email: user.email,
-        createdAt: user.created_at,
-        updatedAt: user.updated_at,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
     };
 };

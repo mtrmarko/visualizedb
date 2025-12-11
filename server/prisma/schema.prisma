@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String   @id
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  createdAt     Int      @map("created_at")
+  updatedAt     Int      @map("updated_at")
+
+  diagrams      Diagram[]
+  versions      DiagramVersion[]
+  config        UserConfig?
+  filters       DiagramFilter[]
+
+  @@map("users")
+}
+
+model Diagram {
+  id                 String   @id
+  userId             String   @map("user_id")
+  name               String
+  databaseType       String   @map("database_type")
+  databaseEdition    String?  @map("database_edition")
+  tablesJson         String?  @map("tables_json")
+  relationshipsJson  String?  @map("relationships_json")
+  dependenciesJson   String?  @map("dependencies_json")
+  areasJson          String?  @map("areas_json")
+  customTypesJson    String?  @map("custom_types_json")
+  notesJson          String?  @map("notes_json")
+  createdAt          Int      @map("created_at")
+  updatedAt          Int      @map("updated_at")
+
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions           DiagramVersion[]
+  filter             DiagramFilter?
+
+  @@index([userId])
+  @@index([updatedAt])
+  @@map("diagrams")
+}
+
+model DiagramVersion {
+  id           String   @id
+  diagramId    String   @map("diagram_id")
+  userId       String   @map("user_id")
+  versionName  String   @map("version_name")
+  description  String?
+  snapshotJson String   @map("snapshot_json")
+  createdAt    Int      @map("created_at")
+
+  diagram      Diagram  @relation(fields: [diagramId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([diagramId])
+  @@index([createdAt])
+  @@map("diagram_versions")
+}
+
+model UserConfig {
+  userId            String  @id @map("user_id")
+  defaultDiagramId  String? @map("default_diagram_id")
+  configJson        String? @map("config_json")
+
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_config")
+}
+
+model DiagramFilter {
+  diagramId      String  @id @map("diagram_id")
+  userId         String  @map("user_id")
+  tableIdsJson   String? @map("table_ids_json")
+  schemaIdsJson  String? @map("schema_ids_json")
+
+  diagram        Diagram @relation(fields: [diagramId], references: [id], onDelete: Cascade)
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("diagram_filters")
+}
