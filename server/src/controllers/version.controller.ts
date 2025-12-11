@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from 'express';
-import { body, validationResult } from 'express-validator';
 import {
     createVersion,
     listVersions,
@@ -7,29 +6,6 @@ import {
     restoreVersion,
     deleteVersion,
 } from '../services/version.service';
-
-export const validateCreateVersion = [
-    body('versionName')
-        .notEmpty()
-        .withMessage('Version name is required')
-        .isLength({ max: 200 })
-        .withMessage('Version name must not exceed 200 characters'),
-    body('description')
-        .optional()
-        .isLength({ max: 1000 })
-        .withMessage('Description must not exceed 1000 characters'),
-];
-
-export const validate = (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            error: 'Validation failed',
-            details: errors.array(),
-        });
-    }
-    next();
-};
 
 export const create = (req: Request, res: Response, next: NextFunction) => {
     try {

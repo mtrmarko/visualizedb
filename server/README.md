@@ -107,6 +107,7 @@ All require authentication.
 - `GET /versions/:versionId` - Get version with full snapshot
 - `POST /versions` - Create new snapshot
 - `POST /versions/:versionId/restore` - Restore diagram to this version
+- `DELETE /versions/:versionId` - Delete a version
 
 ### Config & Filters
 
@@ -114,6 +115,12 @@ All require authentication.
 - `PUT /api/diagrams/config` - Update config
 - `GET /api/diagrams/:id/filter` - Get diagram filters
 - `PUT /api/diagrams/:id/filter` - Update filters
+- `DELETE /api/diagrams/:id/filter` - Delete filters for a diagram
+
+## API Docs
+
+- OpenAPI JSON: `GET /api/openapi.json`
+- Swagger UI: `GET /api/docs`
 
 ## Database Schema
 

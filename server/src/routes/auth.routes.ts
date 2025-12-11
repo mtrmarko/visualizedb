@@ -5,16 +5,18 @@ import {
     logout,
     refresh,
     me,
-    validateSignup,
-    validateLogin,
-    validate,
 } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import {
+    signupRequestSchema,
+    loginRequestSchema,
+} from '../schemas/auth.schema';
 
 const router = Router();
 
-router.post('/signup', validateSignup, validate, signup);
-router.post('/login', validateLogin, validate, login);
+router.post('/signup', validate(signupRequestSchema), signup);
+router.post('/login', validate(loginRequestSchema), login);
 router.post('/logout', logout);
 router.post('/refresh', refresh);
 router.get('/me', authenticate, me);

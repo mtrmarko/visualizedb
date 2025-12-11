@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from 'express';
-import { body, validationResult } from 'express-validator';
 import { createUser, verifyUser, getUserById } from '../services/auth.service';
 import {
     generateAccessToken,
@@ -10,35 +9,6 @@ import type { AuthResponse } from '../shared/api-types';
 
 const REFRESH_TOKEN_COOKIE = 'refreshToken';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
-
-export const validateSignup = [
-    body('email')
-        .isEmail()
-        .normalizeEmail()
-        .withMessage('Invalid email address'),
-    body('password')
-        .isLength({ min: 8 })
-        .withMessage('Password must be at least 8 characters long'),
-];
-
-export const validateLogin = [
-    body('email')
-        .isEmail()
-        .normalizeEmail()
-        .withMessage('Invalid email address'),
-    body('password').notEmpty().withMessage('Password is required'),
-];
-
-export const validate = (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            error: 'Validation failed',
-            details: errors.array(),
-        });
-    }
-    next();
-};
 
 export const signup = async (
     req: Request,

@@ -5,10 +5,10 @@ import {
     get,
     restore,
     remove,
-    validateCreateVersion,
-    validate,
 } from '../controllers/version.controller';
 import { authenticate, verifyDiagramOwnership } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { versionCreateSchema } from '../schemas/version.schema';
 
 const router = Router();
 
@@ -19,8 +19,7 @@ router.use(authenticate);
 router.post(
     '/:diagramId/versions',
     verifyDiagramOwnership,
-    validateCreateVersion,
-    validate,
+    validate(versionCreateSchema),
     create
 );
 router.get('/:diagramId/versions', verifyDiagramOwnership, list);
