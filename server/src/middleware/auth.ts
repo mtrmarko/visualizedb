@@ -6,12 +6,13 @@ export const authenticate = (
     req: Request,
     res: Response,
     next: NextFunction
-) => {
+): void => {
     try {
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ error: 'No token provided' });
+            res.status(401).json({ error: 'No token provided' });
+            return;
         }
 
         const token = authHeader.substring(7); // Remove 'Bearer ' prefix
@@ -25,7 +26,7 @@ export const authenticate = (
 
         next();
     } catch {
-        return res.status(401).json({ error: 'Invalid or expired token' });
+        res.status(401).json({ error: 'Invalid or expired token' });
     }
 };
 
@@ -33,7 +34,7 @@ export const verifyDiagramOwnership = (
     req: Request,
     res: Response,
     next: NextFunction
-) => {
+): void => {
     try {
         const diagramId = req.params.id || req.params.diagramId;
         const userId = req.user?.userId;
@@ -48,7 +49,8 @@ export const verifyDiagramOwnership = (
         );
 
         if (!userId) {
-            return res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
         }
 
         const diagram = db
@@ -58,16 +60,18 @@ export const verifyDiagramOwnership = (
         console.log('verifyDiagramOwnership - diagram found:', !!diagram);
 
         if (!diagram) {
-            return res.status(404).json({ error: 'Diagram not found' });
+            res.status(404).json({ error: 'Diagram not found' });
+            return;
         }
 
         if (diagram.user_id !== userId) {
-            return res.status(403).json({ error: 'Access denied' });
+            res.status(403).json({ error: 'Access denied' });
+            return;
         }
 
         next();
     } catch (error) {
         console.error('verifyDiagramOwnership - error:', error);
-        return res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Server error' });
     }
 };

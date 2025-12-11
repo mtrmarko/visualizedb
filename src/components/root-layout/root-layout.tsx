@@ -1,11 +1,10 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { AuthProvider } from '@/context/auth-context';
-
-const useBackend = import.meta.env.VITE_USE_BACKEND === 'true';
+import { backendEnabled } from '@/config/app-config';
 
 export const RootLayout: React.FC = () => {
-    if (useBackend) {
+    if (backendEnabled) {
         return (
             <AuthProvider>
                 <Outlet />

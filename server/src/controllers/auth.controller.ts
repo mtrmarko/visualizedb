@@ -1,44 +1,14 @@
 import type { Request, Response, NextFunction } from 'express';
-import { body, validationResult } from 'express-validator';
 import { createUser, verifyUser, getUserById } from '../services/auth.service';
 import {
     generateAccessToken,
     generateRefreshToken,
     verifyRefreshToken,
 } from '../config/auth';
-import type { AuthResponse } from '../types/api.types';
+import type { AuthResponse } from '../shared/api-types';
 
 const REFRESH_TOKEN_COOKIE = 'refreshToken';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
-
-export const validateSignup = [
-    body('email')
-        .isEmail()
-        .normalizeEmail()
-        .withMessage('Invalid email address'),
-    body('password')
-        .isLength({ min: 8 })
-        .withMessage('Password must be at least 8 characters long'),
-];
-
-export const validateLogin = [
-    body('email')
-        .isEmail()
-        .normalizeEmail()
-        .withMessage('Invalid email address'),
-    body('password').notEmpty().withMessage('Password is required'),
-];
-
-export const validate = (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            error: 'Validation failed',
-            details: errors.array(),
-        });
-    }
-    next();
-};
 
 export const signup = async (
     req: Request,
@@ -126,17 +96,22 @@ export const login = async (
     }
 };
 
-export const logout = (req: Request, res: Response) => {
+export const logout = (_req: Request, res: Response) => {
     res.clearCookie(REFRESH_TOKEN_COOKIE);
     res.json({ success: true });
 };
 
-export const refresh = (req: Request, res: Response, next: NextFunction) => {
+export const refresh = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): void => {
     try {
         const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE];
 
         if (!refreshToken) {
-            return res.status(401).json({ error: 'No refresh token provided' });
+            res.status(401).json({ error: 'No refresh token provided' });
+            return;
         }
 
         const payload = verifyRefreshToken(refreshToken);
@@ -144,7 +119,8 @@ export const refresh = (req: Request, res: Response, next: NextFunction) => {
         // Verify user still exists
         const user = getUserById(payload.userId);
         if (!user) {
-            return res.status(401).json({ error: 'User not found' });
+            res.status(401).json({ error: 'User not found' });
+            return;
         }
 
         const accessToken = generateAccessToken({
@@ -159,18 +135,20 @@ export const refresh = (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export const me = (req: Request, res: Response, next: NextFunction) => {
+export const me = (req: Request, res: Response, next: NextFunction): void => {
     try {
         const userId = req.user?.userId;
 
         if (!userId) {
-            return res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
         }
 
         const user = getUserById(userId);
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            res.status(404).json({ error: 'User not found' });
+            return;
         }
 
         res.json({ user });

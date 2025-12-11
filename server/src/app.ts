@@ -9,6 +9,7 @@ import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import authRoutes from './routes/auth.routes';
 import diagramRoutes from './routes/diagram.routes';
 import versionRoutes from './routes/version.routes';
+import { openApiDocument } from './config/openapi';
 
 const app = express();
 
@@ -41,8 +42,35 @@ app.use('/api/diagrams', diagramRoutes);
 app.use('/api/diagrams', versionRoutes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: Date.now() });
+});
+
+// OpenAPI spec + docs
+app.get('/api/openapi.json', (_req, res) => {
+    res.json(openApiDocument);
+});
+
+app.get('/api/docs', (_req, res) => {
+    res.type('html').send(`<!doctype html>
+<html>
+<head>
+  <title>VisualizeDB API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    window.onload = () => {
+      window.ui = SwaggerUIBundle({
+        url: '/api/openapi.json',
+        dom_id: '#swagger-ui',
+      });
+    };
+  </script>
+</body>
+</html>`);
 });
 
 // Serve static files from React build in production
@@ -51,7 +79,7 @@ if (isProduction) {
     app.use(express.static(clientBuildPath));
 
     // SPA fallback - serve index.html for all non-API routes
-    app.get('*', (req, res) => {
+    app.get('*', (_req, res) => {
         res.sendFile(path.join(clientBuildPath, 'index.html'));
     });
 } else {

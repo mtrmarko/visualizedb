@@ -26,7 +26,8 @@
         /* Paths */
         "baseUrl": ".",
         "paths": {
-            "@/*": ["./src/*"]
+            "@/*": ["./src/*"],
+            "@shared/*": ["./server/src/shared/*"]
         }
     },
     "include": ["src", "vitest.config.ts"]

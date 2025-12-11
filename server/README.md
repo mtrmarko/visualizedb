@@ -86,6 +86,20 @@ All require authentication.
 - `POST /diagrams` - Create diagram
 - `PUT /diagrams/:id` - Update diagram
 - `DELETE /diagrams/:id` - Delete diagram
+- Nested entity endpoints:
+  - `GET|POST|DELETE /diagrams/:id/tables` and `/diagrams/:id/tables/:tableId`
+  - `GET|POST|DELETE /diagrams/:id/relationships` and `/diagrams/:id/relationships/:relationshipId`
+  - `GET|POST|DELETE /diagrams/:id/dependencies` and `/diagrams/:id/dependencies/:dependencyId`
+  - `GET|POST|DELETE /diagrams/:id/areas` and `/diagrams/:id/areas/:areaId`
+  - `GET|POST|DELETE /diagrams/:id/custom-types` and `/diagrams/:id/custom-types/:customTypeId`
+  - `GET|POST|DELETE /diagrams/:id/notes` and `/diagrams/:id/notes/:noteId`
+- Entity updates by ID (no diagramId needed):
+  - `PUT /diagrams/tables/:tableId`
+  - `PUT /diagrams/relationships/:relationshipId`
+  - `PUT /diagrams/dependencies/:dependencyId`
+  - `PUT /diagrams/areas/:areaId`
+  - `PUT /diagrams/custom-types/:customTypeId`
+  - `PUT /diagrams/notes/:noteId`
 
 ### Versions (`/api/diagrams/:diagramId/versions`)
 
@@ -93,6 +107,7 @@ All require authentication.
 - `GET /versions/:versionId` - Get version with full snapshot
 - `POST /versions` - Create new snapshot
 - `POST /versions/:versionId/restore` - Restore diagram to this version
+- `DELETE /versions/:versionId` - Delete a version
 
 ### Config & Filters
 
@@ -100,6 +115,12 @@ All require authentication.
 - `PUT /api/diagrams/config` - Update config
 - `GET /api/diagrams/:id/filter` - Get diagram filters
 - `PUT /api/diagrams/:id/filter` - Update filters
+- `DELETE /api/diagrams/:id/filter` - Delete filters for a diagram
+
+## API Docs
+
+- OpenAPI JSON: `GET /api/openapi.json`
+- Swagger UI: `GET /api/docs`
 
 ## Database Schema
 

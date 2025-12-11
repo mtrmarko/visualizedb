@@ -1,17 +1,21 @@
 import jwt from 'jsonwebtoken';
 import { config } from './env';
-import type { AuthPayload } from '../types/api.types';
+import type { AuthPayload } from '../shared/api-types';
 
 export const generateAccessToken = (payload: AuthPayload): string => {
-    return jwt.sign(payload, config.jwt.secret, {
-        expiresIn: config.jwt.expiresIn,
-    });
+    return jwt.sign(
+        payload,
+        config.jwt.secret,
+        { expiresIn: config.jwt.expiresIn } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+    );
 };
 
 export const generateRefreshToken = (payload: AuthPayload): string => {
-    return jwt.sign(payload, config.jwt.refreshSecret, {
-        expiresIn: config.jwt.refreshExpiresIn,
-    });
+    return jwt.sign(
+        payload,
+        config.jwt.refreshSecret,
+        { expiresIn: config.jwt.refreshExpiresIn } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+    );
 };
 
 export const verifyAccessToken = (token: string): AuthPayload => {
