@@ -16,7 +16,7 @@ import { ExportImageProvider } from '@/context/export-image-context/export-image
 import { DialogProvider } from '@/context/dialog-context/dialog-provider';
 import { KeyboardShortcutsProvider } from '@/context/keyboard-shortcuts-context/keyboard-shortcuts-provider';
 import { Spinner } from '@/components/spinner/spinner';
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from '@dr.pogodin/react-helmet';
 import { AlertProvider } from '@/context/alert-context/alert-provider';
 import { CanvasProvider } from '@/context/canvas-context/canvas-provider';
 import { useDiagramLoader } from './use-diagram-loader';

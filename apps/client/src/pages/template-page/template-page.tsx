@@ -30,7 +30,7 @@ import { Badge } from '@/components/badge/badge';
 import { Canvas } from '../editor-page/canvas/canvas';
 import { ReactFlowProvider } from '@xyflow/react';
 import { VisualizeDBProvider } from '@/context/visualizedb-context/visualizedb-provider';
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from '@dr.pogodin/react-helmet';
 import { APP_URL, HOST_URL } from '@/lib/env';
 import { Link } from '@/components/link/link';
 

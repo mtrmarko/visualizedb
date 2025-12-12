@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from '@dr.pogodin/react-helmet';
 import { HOST_URL } from '@/lib/env';
 
 export interface TemplatesPageHelmetProps {

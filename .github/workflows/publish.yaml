@@ -21,10 +21,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js 22.x
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
 
       - name: Log in to the Container registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
@@ -34,13 +40,13 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Build project
-        run: npm run build
+        run: pnpm run build
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

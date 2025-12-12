@@ -8,7 +8,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { LocalConfigProvider } from '@/context/local-config-context/local-config-provider';
 import { StorageProvider } from '@/context/storage-context';
 import { ThemeProvider } from '@/context/theme-context/theme-provider';
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from '@dr.pogodin/react-helmet';
 import { useNavigate } from 'react-router-dom';
 import { useStorage } from '@/hooks/use-storage';
 import type { Diagram } from '@visualizedb/shared';

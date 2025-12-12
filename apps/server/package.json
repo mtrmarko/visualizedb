@@ -7,6 +7,9 @@
     "dev": "nodemon --watch src --exec tsx src/index.ts",
     "build": "prisma generate && tsc",
     "start": "node dist/index.js",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "pnpm run lint -- --fix",
+    "test": "echo \"No tests specified\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
@@ -40,6 +43,9 @@
     "zod-openapi": "^5.4.5"
   },
   "devDependencies": {
+    "@eslint/compat": "^2.0.0",
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^9.39.1",
     "@types/bcrypt": "^6.0.0",
     "@types/compression": "^1.7.5",
     "@types/cookie-parser": "^1.4.6",
@@ -47,9 +53,15 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^25.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
+    "@typescript-eslint/parser": "^8.49.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.5.0",
     "nodemon": "^3.0.2",
     "prisma": "^7.1.0",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.9.3"
   }
 }
