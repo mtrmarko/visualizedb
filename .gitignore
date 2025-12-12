@@ -29,6 +29,6 @@ dist-ssr
 stats/
 
 # Backend database
-server/database/*.db
-server/database/*.db-shm
-server/database/*.db-wal
+apps/server/database/*.db
+apps/server/database/*.db-shm
+apps/server/database/*.db-wal
