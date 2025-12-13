@@ -31,10 +31,10 @@ cp .env.example .env
 
 ```env
 NODE_ENV=development
-PORT=3001
+PORT=5174
 JWT_SECRET=your-secret-key-here-change-in-production
 REFRESH_TOKEN_SECRET=your-refresh-token-secret-here
-DATABASE_PATH=./database/visualizedb.db
+DATABASE_URL=file:./database/visualizedb.db
 CORS_ORIGIN=http://localhost:5173
 ```
 
@@ -187,10 +187,10 @@ Update `server/.env`:
 
 ```env
 NODE_ENV=production
-PORT=3001
+PORT=5174
 JWT_SECRET=<strong-random-secret>
 REFRESH_TOKEN_SECRET=<strong-random-secret>
-DATABASE_PATH=./database/visualizedb.db
+DATABASE_URL=file:./database/visualizedb.db
 CORS_ORIGIN=https://yourdomain.com
 ```
 

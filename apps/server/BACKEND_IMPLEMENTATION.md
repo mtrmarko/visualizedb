@@ -222,10 +222,10 @@ VITE_USE_BACKEND=true
 **`server/.env`**:
 ```env
 NODE_ENV=development
-PORT=3001
+PORT=5174
 JWT_SECRET=development-jwt-secret-key-change-in-production
 REFRESH_TOKEN_SECRET=development-refresh-secret-key
-DATABASE_PATH=./database/visualizedb.db
+DATABASE_URL=file:./database/visualizedb.db
 CORS_ORIGIN=http://localhost:5173
 ```
 

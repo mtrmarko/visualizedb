@@ -7,6 +7,9 @@ permissions:
   contents: write
   packages: write
 
+env:
+  DATABASE_URL: ${{ vars.DATABASE_URL }}
+
 jobs:
   release:
     runs-on: ubuntu-latest
