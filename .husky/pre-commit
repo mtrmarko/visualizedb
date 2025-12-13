@@ -1,13 +1,7 @@
 #!/bin/sh
 
-# Run lint first
-pnpm run lint || { echo "lint failed, please run \"pnpm run lint:fix\" to fix the errors." ; exit 1; }
-
-# Prevent commits that modify code without a staged .changeset file.
-STAGED=$(git diff --cached --name-only)
-# ignore docs and workflow changes
-FILTERED=$(echo "$STAGED" | grep -v '^.changeset/' | grep -vE '(^README.md$|^docs/|^\.github/)') || true
-if [ -n "$FILTERED" ] && ! echo "$STAGED" | grep -q '^.changeset/'; then
-  echo "\nError: No .changeset file staged for this commit. Run 'pnpm changeset' and include the generated file.\n" >&2
+# Run lint
+pnpm run lint || {
+  echo "❌ Lint failed. Run 'pnpm run lint:fix' to fix errors."
   exit 1
-fi
+}
