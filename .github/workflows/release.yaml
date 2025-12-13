@@ -8,8 +8,10 @@ on:
 permissions:
   contents: write
   packages: write
+  id-token: write # Required for provenance and SBOM
 
 env:
+  DOCKER_IMAGE_NAME: mtrmarko/visualizedb
   DATABASE_URL: ${{ vars.DATABASE_URL }}
 
 jobs:
@@ -55,8 +57,36 @@ jobs:
             --notes-file CHANGELOG.md \
             --repo ${{ github.repository }}
 
-      # TODO: Add Docker build and push steps here
-      # - name: Build Docker image
-      #   run: |
-      #     docker build -t visualizedb:${{ steps.version.outputs.version }} .
-      #     docker tag visualizedb:${{ steps.version.outputs.version }} visualizedb:latest
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract Docker metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable=${{ github.ref == format('refs/tags/v{0}', steps.version.outputs.version) }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: true # Enable provenance
+          sbom: true # Enable SBOM
+          build-args: |
+            DATABASE_URL=${{ env.DATABASE_URL }}

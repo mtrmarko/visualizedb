@@ -73,13 +73,24 @@ app.get('/api/docs', (_req, res) => {
 </html>`);
 });
 
+// Serve runtime config for client
+app.get('/config.js', (_req, res) => {
+    res.type('application/javascript');
+    res.send(`window.env = {
+        OPENAI_API_KEY: "${process.env.OPENAI_API_KEY || ''}",
+        OPENAI_API_ENDPOINT: "${process.env.OPENAI_API_ENDPOINT || ''}",
+        LLM_MODEL_NAME: "${process.env.LLM_MODEL_NAME || ''}"
+    };`);
+});
+
 // Serve static files from React build in production
 if (isProduction) {
-    const clientBuildPath = path.join(__dirname, '../../dist');
+    const clientBuildPath =
+        process.env.CLIENT_BUILD_PATH || path.join(__dirname, '../client');
     app.use(express.static(clientBuildPath));
 
     // SPA fallback - serve index.html for all non-API routes
-    app.get('*', (_req, res) => {
+    app.get(/.*/, (_req, res) => {
         res.sendFile(path.join(clientBuildPath, 'index.html'));
     });
 } else {

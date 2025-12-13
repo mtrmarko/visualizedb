@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: "file:/app/data/visualizedb.sqlite"
+    image: mtrmarko/visualizedb:latest
+    container_name: visualizedb_app
+    restart: unless-stopped
+    environment:
+      # These variables are mostly set in Dockerfile, but can be overridden here.
+      # Ensure DATABASE_URL points to the volume mounted /app/data
+      DATABASE_URL: "file:/app/data/visualizedb.sqlite"
+      NODE_ENV: production
+      PORT: 3000
+      CORS_ORIGIN: "http://localhost" # For Caddy reverse proxy
+      # Optional OpenAI Configuration
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_API_ENDPOINT: ${OPENAI_API_ENDPOINT:-}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-}
+    volumes:
+      - visualizedb_data:/app/data # For SQLite database persistence
+
+  caddy:
+    image: caddy:latest
+    container_name: visualizedb_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data # Persistent storage for Caddy certificates and data
+
+volumes:
+  visualizedb_data:
+  caddy_data:

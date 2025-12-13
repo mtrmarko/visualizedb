@@ -39,6 +39,7 @@ spec/
 *.DS_Store
 *.log
 *.lock
+!pnpm-lock.yaml
 *.tmp
 
 # Ignore coverage output
