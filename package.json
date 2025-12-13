@@ -1,6 +1,7 @@
 {
   "name": "visualizedb-monorepo",
   "private": true,
+  "version": "1.0.0",
   "scripts": {
     "dev:client": "pnpm --filter visualizedb-client dev",
     "dev:server": "pnpm --filter visualizedb-server dev",
@@ -9,11 +10,14 @@
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
     "format": "prettier --write .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "changeset": "changeset",
+    "version:changeset": "pnpm changeset version"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
     "husky": "^9.1.7",
-    "prettier": "^3.7.4"
+    "prettier": "^3.7.4",
+    "@changesets/cli": "^2.25.0"
   }
 }

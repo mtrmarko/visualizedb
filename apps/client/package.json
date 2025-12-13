@@ -1,8 +1,9 @@
 {
     "name": "visualizedb-client",
     "private": true,
-    "version": "1.0.0",
     "type": "module",
+    "author": "Marko Mitrovic, ChartDB Contributors",
+    "license": "AGPL-3.0-only",
     "scripts": {
         "dev": "vite",
         "build": "pnpm run lint && tsc -b && vite build",
