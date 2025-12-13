@@ -11,13 +11,18 @@
     "test": "pnpm -r test",
     "format": "prettier --write .",
     "prepare": "husky",
-    "changeset": "changeset",
-    "version:changeset": "pnpm changeset version"
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
+    "release:patch": "standard-version --release-as patch",
+    "release:dry-run": "standard-version --dry-run"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
     "concurrently": "^9.2.1",
     "husky": "^9.1.7",
     "prettier": "^3.7.4",
-    "@changesets/cli": "^2.25.0"
+    "standard-version": "^9.5.0"
   }
 }
