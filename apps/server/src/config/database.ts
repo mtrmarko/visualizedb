@@ -4,7 +4,7 @@ import { config } from './env';
 
 // Create Prisma adapter with libsql config
 const adapter = new PrismaLibSql({
-    url: `file:${config.database.path}`,
+    url: process.env.DATABASE_URL || 'file:./database/visualizedb.db',
 });
 
 // Initialize Prisma Client with adapter

@@ -1,5 +1,4 @@
 import dotenv from 'dotenv';
-import path from 'path';
 
 // Load environment variables
 dotenv.config();
@@ -17,12 +16,6 @@ export const config = {
             process.env.REFRESH_TOKEN_SECRET ||
             'development-refresh-secret-key',
         refreshExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
-    },
-
-    database: {
-        path:
-            process.env.DATABASE_PATH ||
-            path.join(__dirname, '../../database/visualizedb.db'),
     },
 
     cors: {
