@@ -1,0 +1,22 @@
+# Caddyfile for VisualizeDB
+# For local development with Docker Compose
+
+# The root domain to serve. For local testing, use 'localhost'.
+# For production, replace 'localhost' with your domain (e.g., 'visualizedb.com').
+# Caddy will automatically handle HTTPS for named domains.
+localhost {
+  # Enable automatic HTTPS
+  tls internal
+
+  # Reverse proxy all requests to the Node.js application container
+  # The 'app' is the service name defined in docker-compose.yml
+  reverse_proxy app:3000 {
+    # Modify the Host header to match the upstream server's expectation
+    header_up Host {http.request.host}
+    # Pass along the X-Real-IP and X-Forwarded-For headers
+    header_up X-Real-IP {http.remote_host}
+    header_up X-Forwarded-For {http.remote_host}
+    # Pass along the X-Forwarded-Proto header for HTTPS detection
+    header_up X-Forwarded-Proto {http.request.scheme}
+  }
+}
